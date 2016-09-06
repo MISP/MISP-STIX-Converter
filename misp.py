@@ -390,4 +390,5 @@ class MISP:
           else:
             
             #No attributes. You may as well get rid of it.
+            print("NO EVENTS :c")
             return self.mispAPI.delete_event(eventID)

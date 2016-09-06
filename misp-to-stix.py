@@ -4,7 +4,6 @@
 #     WRAPPER SCRIPT     #
 #     DEALS WITH MISP    #
 #     TO STIX            #
-#     AND VISA VERSA     #
 ##########################
 
 
