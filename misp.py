@@ -28,17 +28,16 @@ import cybox
 import base64
 import logging
 import hashlib
+import stixtomisp
 from smash import utils
 from stix.common import STIXPackage
 from cybox.objects import file_object, address_object, domain_name_object, hostname_object, uri_object, link_object
 from cybox.common.hashes import Hash
-
-# Disable Insecure Request Warning
+import requests
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
-
-# Get logger
 log = logging.getLogger("__main__")
+
 
 def tostr(v):
   """
@@ -84,8 +83,7 @@ class MISP:
     self.url = url
     self.key = key
     self.verify = verify
-    if url != None:
-        self.mispAPI = pymisp.PyMISP(url, key, ssl=self.verify, debug=False)
+    self.mispAPI = pymisp.PyMISP(url, key, ssl=self.verify, debug=False)
     self.misp_modules = misp_modules
 
   def pull(self,id_=None, tags=None, from_=None, to=None):
@@ -256,28 +254,6 @@ class MISP:
       #Check that it is indeed a STIX package
       if isinstance(data, STIXPackage):
 
-        #Check if we have an active misp-modules option
-        if self.misp_modules:
-          #Try connecting to it
-          try:
-            module_call = requests.get(self.misp_modules + "/modules").json()
-            #Check the server offers stiximport
-            for mod in module_call:
-              if mod["name"] == "stiximport":
-                #Encode the file and send it to the import module
-                filedata = str(base64.b64encode(data.to_xml()), 'utf-8')
-                misp_import = requests.post(self.misp_modules + "/query",
-                                            data = json.dumps({"module":"stiximport",
-                                                    "data":filedata
-                                                    })
-                                            ).json() 
-                self.mispAPI.add_event(misp_import)                            
-                return True
-            raise ValueError("STIXImport not supported")      
-          except Exception as ex:
-            print(ex)
-            #Fallback to inbuilt conversion      
-        #Add a title for displaying 
         if not data.stix_header:
           data.stix_header = stix.core.STIXHeader()
         if not data.stix_header.title:
@@ -292,103 +268,30 @@ class MISP:
                   threat_level_id = kwargs.get("threat_level_id", 3),
                   analysis = kwargs.get("analysis", 0),
                   info = data.stix_header.title)
-          #Save the ID for future use
-          eventID = event["Event"]["id"]
-          
-          log.debug("Created event {}".format(eventID))
-          log.debug(event)
-          #TODO: Get this to work. Currently the server responds 500 
-          ##Share with signature group
-          ##event["Event"]["distribution"] = 4
-          ##event["Event"]["sharing_group_id"] = 1
-          ##event["Event"]["timestamp"] = int(event["Event"]["timestamp"])+1
-          log.debug("Adding threat actors..."); 
-          #Add all actors          
-          if data.threat_actors:
-            for i in data.threat_actors:
-              try:
-                log.debug("Adding {}".format(tostr(i.title)))
-                event=self.mispAPI.add_threat_actor(event, 
-                                                    tostr(i.title),
-                                               comment=tostr(i.description))
-                 
-              except Exception as ex:
-                log.error(ex)
-                log.error(event)
-                pass
-          
-          #Utility regex for assisting in identifying IPs
-          ipre = re.compile("[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}")
-          log.debug("Adding observables...")
-          #Add all observables
-          if data.observables:
-            log.debug("We can see {} observables".format(len(data.observables)))
-            for i in data.observables:
-                log.debug("Trying to add {}".format(i.object_))
-                try:
-                  addr = i.object_.properties.address_value.value   
-                  log.debug("Adding address {}".format(addr)) 
-                  if ipre.match(addr):
-                    event = self.mispAPI.add_ipdst(event, str(addr), comment="Net: {}".format(addr))
-                  else:
-                    event = self.mispAPI.add_domain(event, str(addr), comment="Net: {}".format(addr))
-                except Exception as ex:
-                  log.error("ERROR ADDING OBSERVABLE")
-                  log.error(event)
-                  log.error(ex)
 
-          #Add indicators -- this is a wide range, so we'll need a lot
-          if data.indicators:
-            for i in data.indicators:
-              for o in i.observables:
-                try:
-                  log.debug("Trying to add {}".format(o))
-                  props = o.object_.properties
-                  log.debug("Adding {}".format(props))
-                  #FILE HASHES
-                  if props.hashes:
-                    for hash_ in props.hashes:
-                      val = hash_.simple_hash_value.value
-                      type_ = hash_.type_
-
-                      #Check the hash type, so we don't categorise it wrongly
-                      if type_ == "MD5":
-                        event = self.mispAPI.add_hashes(
-                                      event, 
-                                      md5=val
-                                )
-                      elif type_ == "SHA256":
-                        event = self.mispAPI.add_hashes(
-                                      event,
-                                      sha256=val
-                        )
-                except Exception as ex:
-                  pass
-          log.debug(event) 
-          #Check if any attributes have actually been added
-          if len(event["Event"]["Attribute"]) != 0:
-            try:
-              #Tell MISP about the new attributes
-              self.mispAPI.update_event(eventID, event)
-              
-              #Tag the event as un/verified
-              self.mispAPI.add_tag(
-               event,
-               "OK" if kwargs.get("verified", False) else "Unverified")
-              tags = kwargs.get("tags", [])
-              
-              #If we've only been given one tag, make it a list for iteration
-              if not isinstance(tags, list):
-                tags = [tags]  
-
-              #Add the tags
-              for i in tags:
-                self.mispAPI.add_tag(event, i)
-              return True
-            except:
-              return False
-          else:
+        #Dump and base64 encode the package
+        pkg = str(base64.b64encode(bytes(data.to_json(), 'utf-8')), 'utf-8')
+        #Call the MISP-Modules script
+        request = json.dumps({"data":pkg})
+        attributes = stixtomisp.handler(request)
+        for attr in attributes["results"]:
+            print(attr)
+            # This can return multiple types, just take the first one.
+            type_ = attr["types"][0] 
+            for value in attr["values"]:
+                if type_ == "ip-src":
+                    self.mispAPI.add_ipsrc(event, value, comment="Net {}".format(value))
+                if type_ == "ip-dst":
+                    self.mispAPI.add_ipdst(event, value, comment="Net {}".format(value))
+                if type_ == "threat-actor":
+                    self.mispAPI.add_threat_actor(event, value, comment="TA {}".format(value))
+                if type_ == "domain":
+                    self.mispAPI.add_domain(event, value, comment="Net {}".format(value))
+                if type_ == "hostname":
+                    self.mispAPI.add_hostname(event, value, comment="Net {}".format(value))
+                if type_ == "link":
+                    self.mispAPI.av_detection_link(event, value, comment="Link {}".format(value))
+                if type_ in ["md5", "sha1", "sha256"]:
+                    args = {type_:value, "event":event, "comment":"Hash {}".format(value)}
+                    self.mispAPI.add_hashes(**args)
             
-            #No attributes. You may as well get rid of it.
-            print("NO EVENTS :c")
-            return self.mispAPI.delete_event(eventID)

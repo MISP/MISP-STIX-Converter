@@ -14,7 +14,6 @@ import sys
 import json
 from stix.common import STIXPackage
 import base64
-import stiximport
 
 parser = argparse.ArgumentParser(description='Process some integers.')
 parser.add_argument("-c", "--config", help="Path to config file. Default is misp.login.")
@@ -40,29 +39,14 @@ except FileNotFoundError:
 MISP = misp.MISP(CONFIG["MISP"]["URL"], CONFIG["MISP"]["KEY"])
 
 # We'll use my nice little misp module
-with open(args.file, "rb") as f:
-    dataraw = f.read()
-    # Encode the data
-    datareq = base64.b64encode(dataraw)
-    
-request = {"data":str(datareq, 'utf-8')}
+# Load the package
+try:
+    pkg = STIXPackage().from_xml(open(args.file, "r")) 
+except:
+    try:
+        pkg = STIXPackage.from_json(open(args.file, "r"))
+    except:
+        print("Could not load package!")
+        sys.exit(1)
 
-r = stiximport.handler(json.dumps(request))
-
-# Create an event
-api = MISP.mispAPI
-ev = api.new_event(0, 3, 0, "STIX Converted Event")
-for res in r["results"]:
-    t = res["types"][0]
-    for v in res["values"]:
-        if t == "ip-dst":
-            api.add_ipdst(ev, v)
-        elif t == "ip-src":
-            api.add_ipsrc(ev, v)
-        elif t == "domain":
-            api.add_domain(ev, v)
-        elif t == "url":
-            api.add_url(ev, v)
-        elif t == "threat-actor":
-            api.add_threat_actor(ev, v)
-
+MISP.push(pkg)
