@@ -27,9 +27,9 @@ import stix
 import cybox
 import base64
 import logging
+import utils
 import hashlib
 import stixtomisp
-from smash import utils
 from stix.common import STIXPackage
 from cybox.objects import file_object, address_object, domain_name_object, hostname_object, uri_object, link_object
 from cybox.common.hashes import Hash
