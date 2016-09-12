@@ -27,11 +27,13 @@ import stix
 import cybox
 import base64
 import logging
-import utils
 import hashlib
-import stixtomisp
+from smash.servers import stixtomisp
+from smash import utils
 from stix.common import STIXPackage
-from cybox.objects import file_object, address_object, domain_name_object, hostname_object, uri_object, link_object
+from stix.extensions.test_mechanism import snort_test_mechanism, yara_test_mechanism
+from cybox.objects import email_message_object,file_object, address_object, domain_name_object, hostname_object, uri_object, link_object, mutex_object, whois_object, x509_certificate_object
+from cybox.objects import http_session_object, pipe_object, network_packet_object, win_registry_key_object
 from cybox.common.hashes import Hash
 import requests
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
@@ -162,74 +164,315 @@ class MISP:
       return package
 
   def buildAttribute(self, attr, pkg, ind):
+      """
+        Given a MISP attribute, create a stix
+        attribute, add it to an indicator for
+        easy lookings up. 
+
+        There are quite a few assumptions here, 
+        including that there should only be one
+        threat-actor per MISP event in order to
+        give proper attribution.
+      """
+      
+      # Extract 
       cat = attr["category"]
       type_ = attr["type"]
-     
+      value = attr["value"]
+
       if  type_ in ["ip-src", "ip-dst"]:
-        obs = stix.indicator.Observable(
-                address_object.Address(address_value=attr["value"]),
-                title = attr["comment"]
-              )
+        # An IP address. Add it as an Address Object.
+        addr = address_object.Address(address_value=value)
+        obs = stix.indicator.Observable(addr, title = attr["comment"])
         ind.add_observable(obs)
-          #pkg.add(obs)
 
       elif type_ == "domain":
+        # A domain. Add as a DomainName Object.
         dn = domain_name_object.DomainName()
-        dn.value = attr["value"]
+        dn.value = value
         obs = stix.indicator.Observable(dn)
         ind.add_observable(obs)
 
       elif type_ == "hostname":
+        # A hostname. Add as Hostname Object.
         hst = hostname_object.Hostname()
-        hst.hostname_value = attr["value"]
+        hst.hostname_value = value
         obs = stix.indicator.Observable(hst)
         ind.add_observable(obs)
 
-      elif type_ == "url":
-        url = uri_object.URI(attr["value"])
+      elif type_ in ["url", "uri"]:
+        # UR(i|l). I guess we'll use a URI object (as URLs ⊆ URIs).
+        url = uri_object.URI(value)
         obs = obs = stix.indicator.Observable(url)
         ind.add_observable(obs)
 
-      elif type_ in ["md5", "sha1", "sha256"]:
-        hsh = Hash(attr["value"])
+      elif type_ in ["md5", "sha1", "sha256", "sha256"]:
+        # A definite hash. They all come under SimpleHashValue.
+        hsh = Hash(value)
         f = file_object.File()
         f.add_hash(hsh)
         obs = stix.indicator.Observable(f)
         ind.add_observable(f)
     
       elif type_ == "filename":
+        # Just a filename. Add it to a File Object, then add that.
         f = file_object.File()
-        f.file_name = attr["value"]
+        f.file_name = value
         obs = stix.indicator.Observable(f)
         ind.add_observable(f)
       
       elif type_ in ["filename|md5", "filename|sha1", "filename|sha256"]:
-        fname, sep, hsh = attr["value"].partition("|")
+        # A filename AND a hash! Aren't we lucky!
+        # Add the Hash to a File object.
+        fname, sep, hsh = value.partition("|")
         f = file_object.File()
         f.add_hash(hsh)
         f.file_name = fname
         obs = stix.indicator.Observable(f)
         ind.add_observable(f)
 
-      elif type_ in ["ssdeep", "authentihash"]:
-        hsh = Hash(attr["value"])
+      elif type_ in ["ssdeep", "authentihash", "imphash"]:
+        # A fuzzy hash. They're a bit weirder, but
+        # we'll handle them nonetheless. 
+        hsh = Hash(value)
         f = file_object.File()
         f.fuzzy_hash_value = hsh
         obs = stix.indicator.Observable(f)
         ind.add_observable(f)
 
+      elif type_ == "threat-actor":
+        # Threat Actors. Whilst we don't have proper attribution,
+        # we can still add them as a thing.
+        ta = stix.common.ThreatActor()
+        ta.title = value
+        if "comment" in attr:
+          ta.description = attr["comment"]
+        pkg.add_threat_actor(ta)
+
       elif type_ == "campaign-name":
-        camp = stix.common.Campaign(title = attr["value"])
+        # Just a campaign name. Is nice. 
+        # Would be nice if we could structure it
+        # so that it went Camp -> Obs, but sadly
+        # we can't rely on a campaign existing.
+        camp = stix.common.Campaign(title = value)
         pkg.add_campaign(camp)
  
       elif type_ == "link":
-        lnk = link_object.Link(attr["value"])
+        # Arbritary link value. 
+        lnk = link_object.Link(value)
         obs = stix.indicator.Observable(lnk)
+        ind.add_observable(obs)
+
+      elif type_ == "email-src":
+        # Email Source. Create an Email Object,
+        # then add the address in the header.
+        emsg = email_message_object.EmailMessage()
+        esrc = email_message_object.EmailHeader()
+        esrc.from_ = value
+        emsg.header = esrc
+        obs = stix.indicator.Observable(emsg)
+        ind.add_observable(obs)
+
+      elif type_ == "email-subject":
+        # Same as above, but a subject. Add it
+        # to the header.
+        emsg = email_message_object.EmailMessage()
+        esub = email_message_object.EmailHeader()
+        esub.subject = value
+        emsg.header = esub
+        obs = stix.indicator.Observable(emsg)
+        ind.add_observable(obs)
+
+      elif type_ == "email-attachment":
+        # Filename of an attachment. 
+        emsg = email_message_object.EmailMessage()
+        att  = email_message_object.Attachments()
+        att.append(value)
+        emsg.attachments = att
+        obs = stix.indicator.Observable(emsg)
+        ind.add_observable(obs)
+
+      elif type_ == "target-email":
+        # The "TO" field of an email address
+        # Easy enough, just create an email object and shove it
+        # in the hdr.
+        emsg = email_message_object.EmailMessage()
+        esub = email_message_object.EmailHeader()
+        esub.to = value
+        emsg.header = esub
+        obs = stix.indicator.Observable(emsg)
+        ind.add_observable(obs)
+
+      elif type_ == "attachment":
+        # This one is debatable.
+        # I'll ignore it for now.
+        pass
+      
+      elif type_ == "mutex":
+        # A malware Mutex.
+        # Just an fancy observable.
+        mut = mutex_object.Mutex()
+        mut.name = value
+        obs = stix.indicator.Observable(mut)
+        ind.add_observable(obs)
+
+      elif type_ == "x509-fingerprint-sha1":
+        # Not directly transferrable. Best we can do
+        # it putting it on the signature.
+        cert = x509_certificate_object.X509CertificateSignature()
+        cert.signature = "FINGERPRINT: {}".format(value)
+        # TODO: Figure out how to add this to a package 
+    
+      elif type_ == "whois-registrant-email":
+        # This is far too much work for an email
+        # Goddamnit STIX.
+        # Create a whois entry
+        whois = whois_object.WhoisEntry()
+        # And a list of registrants
+        # Which is apparently its own object for some reason
+        regs  = whois_object.WhoisRegistrants()
+        reg   = whois_object.WhoisRegistrant()
+        # And add the email address
+        reg.email_address = value
+        regs.append(reg)
+        whois.registrants = regs
+        obs = stix.indicator.Observable(whois)
+        ind.add_observable(obs)
+
+      elif type_ == "whois-registrant-name":
+        # I swear stix just LOVES to add layers
+        # Just a name of the registrant
+        whois = whois_object.WhoisEntry()
+        regs  = whois_object.WhoisRegistrants()
+        reg   = whois_object.WhoisRegistrant()
+        reg.name = value
+        regs.append(reg)
+        whois.registrants = regs
+        obs = stix.indicator.Observable(whois)
+        ind.add_observable(obs)
+      
+      elif type_ == "whois-creation-date":
+        # And the date the whois was created.
+        # Nothing out of the ordinary
+        whois = whois_object.WhoisEntry()
+        whois.creation_date = value
+        obs = stix.indicator.Observable(whois)
+        ind.add_observable(obs)
+
+      elif type_ == "whois-registrar":
+        # Aaaand the registrar
+        whois = whois_object.WhoisEntry()
+        reg = whois_object.WhoisRegistrar()
+        reg.name = value
+        whois.registrar_info = reg
+        obs = stix.indicator.Observable(whois)
+        ind.add_observable(obs)
+
+      elif type_ == "pdb":
+        # NOT SUPPORTED
+        pass
+
+      elif type_ == "domain|ip":
+        # Oooh we've got both!
+        # We'll add them in turn
+        dom,sep,ip = value.partition("|")        
+        
+        #Add the IP
+        addr = address_object.Address(address_value=ip)
+        obs = stix.indicator.Observable(addr, title = attr["comment"])
+        ind.add_observable(obs)
+        
+        # Now add the domain
+        dn = domain_name_object.DomainName()
+        dn.value = dom
+        obs = stix.indicator.Observable(dn)
+        ind.add_observable(obs)
+
+      elif type_ == "vulnerability":
+        # It's a CVE. Easy enough to deal with.
+        vuln = stix.exploit_target.Vulnerability()
+        vuln.cve_id = value
+        et = stix.exploit_target.ExploitTarget()
+        et.add_vulnerability(vuln)
+        pkg.add_exploit_target(et)      
+        
+      elif type_ == "snort":
+        # Some snort rule. Idk what Snort is or does,
+        # but still, we'll take it.
+        snort = snort_test_mechanism.SnortTestMechanism()
+        snort.add_rule(value)
+        ind.test_mechanisms.append(snort)
+
+      elif type_ == "yara":
+        # Now this I know. YARA test rules.
+        # Add it to the list of test mechanisms.
+        yara = yara_test_mechanism.YaraTestMechanism()
+        yara.rule = value
+        ind.test_mechanisms.append(yara)
+
+      elif type_ == "regkey|value":
+        # A windows registry key and a value
+        # Split them and add seperately 
+        regkey,sep,value = value.partition("|")
+        regentry = win_registry_key_object.WinRegistryKey()
+        val = win_registry_key_object.RegistryValue()
+        val.name = regkey
+        val.data = value
+        vals = win_registry_key_object.RegistryValues()
+        vals.append(val)
+        regentry.values = vals
+        obs = stix.indicator.Observable(regentry)
+        ind.add_observable(obs)
+
+      elif type_ == "regkey":
+        # Just a reg key without a value. 
+        regkey,sep,value = value.partition("|")
+        regentry = win_registry_key_object.WinRegistryKey()
+        val = win_registry_key_object.RegistryValue()
+        val.name = regkey
+        vals = win_registry_key_object.RegistryValues()
+        vals.append(val)
+        regentry.values = vals
+        obs = stix.indicator.Observable(regentry)
+        ind.add_observable(obs)
+      
+      elif type_ == "pattern-in-traffic":
+        # Create a packet and set the pattern as the data
+        pack = network_packet_object.IPv4Packet()
+        pack.data = value
+        lay = network_packet_object.InternetLayer()
+        lay.ipv4 = pack
+        net = network_packet_object.NetworkPacket()
+        net.internet_layer = lay
+        obs = stix.indicator.Observable(net)
+        ind.add_observable(obs)
+ 
+      elif type_ == "user-agent":
+        # Probably in the hdr of a HTTP req
+        # My god this goes on for a while
+        http = http_session_object.HTTPRequestHeaderFields()
+        http.user_agent = value
+        hdr = http_session_object.HTTPRequestHeader()
+        hdr.parsed_header = http 
+        req = http_session_object.HTTPClientRequest()
+        req.http_request_header = hdr
+        resp = http_session_object.HTTPRequestResponse()
+        resp.http_client_request = req
+        ses = http_session_object.HTTPSession()
+        ses.http_request_response = resp
+        obs = stix.indicator.Observable(ses)
+        ind.add_observable(obs)
+
+      elif type_ == "named pipe":
+        # Pipe pipe pipe pipe pipe pipe
+        p = pipe_object.Pipe()
+        p.name = value
+        obs = stix.indicator.Observable(p)
         ind.add_observable(obs)
 
       else:
         #Known unsupported
-        if not type_ in ["comment", "pattern-in-file", "other"]:
+        if not type_ in ["campaign-id", "comment", "text", "malware-sample", "pattern-in-file", "other"]:
           print("Not adding {}".format(type_))
 
   def push(self, data, dryrun=False, **kwargs):
@@ -294,4 +537,4 @@ class MISP:
                 if type_ in ["md5", "sha1", "sha256"]:
                     args = {type_:value, "event":event, "comment":"Hash {}".format(value)}
                     self.mispAPI.add_hashes(**args)
-            
+        return event["Event"]["id"]     
