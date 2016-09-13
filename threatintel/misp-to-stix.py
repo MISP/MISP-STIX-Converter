@@ -12,6 +12,7 @@ from conversion import misp
 import pyaml
 import sys
 import json
+import os
 
 parser = argparse.ArgumentParser(description='Process some integers.')
 parser.add_argument('-o', '--outfile', help="The file to output to. Default is stdout")
@@ -26,7 +27,7 @@ args = parser.parse_args()
 if args.config:
     configfile = args.config
 else:
-    configfile = "misp.login"
+    configfile = os.path.expanduser("~/.misptostix/misp.login")
 
 try:
     with open(configfile, "r") as f:

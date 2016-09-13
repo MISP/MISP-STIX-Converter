@@ -14,6 +14,7 @@ import sys
 import json
 from stix.common import STIXPackage
 import base64
+import os
 
 parser = argparse.ArgumentParser(description='Process some integers.')
 parser.add_argument("-c", "--config", help="Path to config file. Default is misp.login.")
@@ -25,7 +26,7 @@ args = parser.parse_args()
 if args.config:
     configfile = args.config
 else:
-    configfile = "misp.login"
+    configfile = os.path.expanduser("~/.misptostix/misp.login")
 
 try:
     with open(configfile, "r") as f:
