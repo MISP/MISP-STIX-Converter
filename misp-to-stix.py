@@ -8,7 +8,7 @@
 
 
 import argparse
-import misp
+from conversion import misp
 import pyaml
 import sys
 import json

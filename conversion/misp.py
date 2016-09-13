@@ -28,12 +28,12 @@ import cybox
 import base64
 import logging
 import hashlib
-from smash.servers import stixtomisp
-from smash import utils
+from . import stixtomisp
+from . import utils
 from stix.common import STIXPackage
 from stix.extensions.test_mechanism import snort_test_mechanism, yara_test_mechanism
 from cybox.objects import email_message_object,file_object, address_object, domain_name_object, hostname_object, uri_object, link_object, mutex_object, whois_object, x509_certificate_object
-from cybox.objects import http_session_object, pipe_object, network_packet_object, win_registry_key_object
+from cybox.objects import as_object, http_session_object, pipe_object, network_packet_object, win_registry_key_object
 from cybox.common.hashes import Hash
 import requests
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
@@ -129,6 +129,7 @@ class MISP:
     packages = []
     for event in recent["response"]:
       packages.append(self.buildPackage(event["id"]))
+      log.debug("{}% done...".format(100*(recent["response"].index(event) / len(recent["response"]))))
     return packages
 
   
@@ -292,7 +293,7 @@ class MISP:
         obs = stix.indicator.Observable(emsg)
         ind.add_observable(obs)
 
-      elif type_ == "target-email":
+      elif type_ in ["email-dst", "target-email"]:
         # The "TO" field of an email address
         # Easy enough, just create an email object and shove it
         # in the hdr.
@@ -469,6 +470,16 @@ class MISP:
         p.name = value
         obs = stix.indicator.Observable(p)
         ind.add_observable(obs)
+
+      elif type_ == "AS":
+        as_ = as_object.AS()
+        try:
+            as_.number = value
+        except ValueError:
+            as_.name = value
+        obs = stix.indicator.Observable(as_)
+        ind.add_observable(obs)
+        
 
       else:
         #Known unsupported
