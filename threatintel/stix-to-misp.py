@@ -8,7 +8,7 @@
 
 
 import argparse
-from conversion import misp
+from threatintel.conversion import misp
 import pyaml
 import sys
 import json
