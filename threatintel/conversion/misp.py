@@ -85,7 +85,8 @@ class MISP:
     self.url = url
     self.key = key
     self.verify = verify
-    self.mispAPI = pymisp.PyMISP(url, key, ssl=self.verify, debug=False)
+    if url:
+        self.mispAPI = pymisp.PyMISP(url, key, ssl=self.verify, debug=False)
     self.misp_modules = misp_modules
 
   def pull(self,id_=None, tags=None, from_=None, to=None):
