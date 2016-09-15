@@ -14,10 +14,6 @@ This should install everything it needs!
 
 Useful, huh?
 
-##Usage:
-
-Once 
-
 ###The config file
 
 Copy over the example config to a live version
@@ -29,6 +25,8 @@ overridden with the `-c FILE` flag when running the scripts.
 
 Then open it and change the variables. This is YAML format, so make sure
 you don't do a silly and format it wrong!
+
+##Usage
 
 ###For MISP to STIX: 
 
