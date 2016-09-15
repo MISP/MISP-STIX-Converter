@@ -15,6 +15,7 @@ import os
 
 from threatintel.servers import misp
 from threatintel.converters import convert
+from threatintel.converters import lint_roller
 
 parser = argparse.ArgumentParser(description='Process some integers.')
 parser.add_argument('-o', '--outfile', help="The file to output to. Default is stdout")
@@ -22,6 +23,7 @@ parser.add_argument("-c", "--config", help="Path to config file. Default is misp
 parser.add_argument("-f", "--file", help="The MISP JSON file to convert")
 parser.add_argument("-i", "--eid", help="The MISP event ID to pull and convert")
 parser.add_argument("--format", help="The output format [JSON/XML]. Default JSON.")
+parser.add_argument("--stix-version", help="Set the STIX output version. Default 1.2.")
 
 args = parser.parse_args()
 
@@ -77,6 +79,22 @@ else:
     # Connect to MISP
     MISP = misp.MISP(CONFIG["MISP"]["URL"], CONFIG["MISP"]["KEY"])
     package = MISP.pull(args.eid)[0]
+
+
+# Set the version
+if args.stix_version:
+    if args.stix_version == "1.1.1":
+        objs = lint_roller.lintRoll(package)
+        for i in obs:
+            # Set the object's version
+            if hasattr(i, "version"):
+                i.version = args.stix_version
+
+    elif args.stix_version == "1.2":
+        pass #Is default
+    else:
+        print("INVALID STIX VERSION {}".format(args.stix_version))
+        sys.exit()
 
 if args.format == "json":
     # Output to JSON

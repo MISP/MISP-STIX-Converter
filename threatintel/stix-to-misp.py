@@ -14,7 +14,7 @@ import json
 import base64
 import os
 
-from stix.common import STIXPackage
+from stix.core import STIXPackage
 from threatintel.servers import misp
 
 parser = argparse.ArgumentParser(description='Process some integers.')

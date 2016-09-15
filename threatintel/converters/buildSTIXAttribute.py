@@ -7,7 +7,7 @@
 
 # Cybox is awful
 import stix
-from stix.common import STIXPackage
+from stix.core import STIXPackage
 from stix.extensions.test_mechanism import snort_test_mechanism, yara_test_mechanism
 
 # No you can't go 

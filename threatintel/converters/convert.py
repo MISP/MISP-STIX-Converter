@@ -9,7 +9,7 @@ import json
 import sys
 
 # Stix imports
-from stix.common import STIXPackage
+from stix.core import STIXPackage
 from stix.core import STIXHeader
 from stix.indicator import Indicator, Observable
 
