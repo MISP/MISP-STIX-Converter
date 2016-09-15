@@ -18,7 +18,7 @@ Useful, huh?
 
 Copy over the example config to a live version
 
-The default location of this config file is at `~/.misptostx`, but this can be
+The default location of this config file is at `~/.misptostix`, but this can be
 overridden with the `-c FILE` flag when running the scripts.
 
 `cp /path/to/config/misp.login.example /path/to/config/misp.login`
