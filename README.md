@@ -2,13 +2,13 @@
 ##Or at least that's the idea
 
 This is the open-sourced version of our internal
-sync script. It's a bit limited, nor perfect, nor is it bug-free.
+sync script. It's a bit limited, nor is it perfect, nor is it bug-free.
 
 But it works™
 
 ##Usage:
 
-First, add exec perms on the relevent files.
+First, add exec perms on the relevant files.
 
 `chmod +x misp-to-stix.py stix-to-misp.py`
 
@@ -30,6 +30,7 @@ To get all usage information:
 So to convert a MISP JSON file to stix json, use
 
 `./misp-to-stix.py -f INFILE.json --format JSON -o OUTFILE.json`
+(the --format flag is used to specify output format, just for reference)
 
 And to pull a specific event from the MISP instance
 
@@ -43,6 +44,7 @@ to.
 `./stix-to-misp.py INFILE.json`
 
 This will convert the file to MISP format and push it. 
-Currently only ip, domain, url and threat actor objects are converted.
+Quite a few bits and bobs get converted, not all of them (I for one blame CyBoX for being
+weird and layered worse than an onion).
 
 Feel free to add more to the stix-to-misp.py file.
