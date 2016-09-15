@@ -3,5 +3,11 @@ python:
     - "3.5"
     - "3.5-dev"
     - "nightly"
-install: "pip install ."
-script:  "nosetests"
+before_install:
+    - "pip install coveralls"
+    - "pip install coverage"
+install: 
+    - "pip install ."
+script:  "nosetests --with-coverage -v"
+after_success:
+    - coveralls
