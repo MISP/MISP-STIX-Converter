@@ -2,7 +2,7 @@
 ##Or at least that's the idea
 
 This is the open-sourced version of our internal
-sync script. It's a bit limited, nor is it perfect, nor is it bug-free.
+sync script. It's a bit limited, and it isn't perfect, nor is it bug-free.
 
 But it works™
 
