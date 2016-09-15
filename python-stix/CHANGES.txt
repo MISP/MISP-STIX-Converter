@@ -1,0 +1,218 @@
+Version 1.1.1.4
+2015-03-19
+- #44 Added StructuredCOA support. This completes the COA structure.
+- #75 Added support for non-list iterable collections in many add_foo()
+  methods and/or property setters.
+- #90 Fixed Campaign.status bug which raised a TypeError
+- #137 Added STIXPackage.add() method which adds input to the appropriate
+  top-level collection.
+- #164 stix.utils.set_id_namespace() also sets the python-cybox id namespace.
+- #187 Added support for OrganisationName and PersonName in CIQ Identity
+  extension.
+- #189 The ns_dict parameter cannot alter default STIX/CybOX namespace mappings.
+- #192 Added support for Related Campaigns on Indicator
+- #197 Created a TypedList abstraction for non-STIX collection objects.
+- #224 Added support for additional entries in the ns_dict parater on to_xml()
+- #240 Added support for references field on Vulnerability
+
+Version 1.1.1.3
+2014-12-22
+- #194, #220, #230 Standardized character encodings.
+- #29 Consolidated common binding code.
+- #96 Adding python-maec integration for MAEC Malware extension.
+- #150 `STIXPackage.from_xml()` method accepts lxml etree object.
+- #227 Fixed `to_obj()` in `TestMechanism` implementations
+
+Version 1.1.1.2
+2014-10-15
+- #10 Partial fix. Improved CDATA handling in bindings and API classes.
+  Added stix.utils.cdata() and stix.utils.strip_cdata() methods.
+- #29 Moved duplicated binding code to stix.bindings module
+- #163 Performance enhancements in to_xml() serialization
+- #148 #202 #210 #214 Fixed several issues with extensions.
+- #171 Indicator @negate attribute not exported unless set
+- #173 Versions on core constructs are only output if set by user.
+- #174 Non-core constructs no longer get auto-assigned IDs.
+- #184 Added `include_schemalocs` parameter to to_xml() for optional
+  schemalocation output
+- #199 Improvements to data marking __init__ methods (thanks @benjamin9999!)
+- #201 Added short_description property to stix.core.STIXHeader class
+- #202 Fixed TOU marking schemalocation
+- #209 Removed Python warning that is raised when trying to resolve
+  schemalocation for id namespace.
+- #215 Fixed typos in Incident class (thanks @DavidWatersHub!)
+- Added more docs to stix.readthedocs.org
+
+Version 1.1.1.1
+2014-08-12
+- #133 Changed stix.core.ttps.TTPs to be iterable
+- #139 Bug/typo fixes with confidence field on stix.indicator.Indicator
+- #145 Updates to VocabString for support of non-default CVs
+- #155 Added walk() and find() methods to stix.Entity class
+- #154 #143 Added YaraTestMechanism and GenericTestMechanism extensions
+- #157 Implemented handling on TTP
+- Made stix.Entity.from_json() a classmethod
+- Added more coverage to STIX constructs
+
+Version 1.1.1.0
+2014-05-09
+- #132 Support for STIX v1.1.1
+- Updated all schemalocations to reference new STIX v1.1.1 schemas
+- Changed Confidence.source to be of type InformationSource
+- Changed Statement.source to be of type InformationSource
+- Changed Sighting.source to be of type InformationSource
+- Updated AvailabilityLossType CV to align with STIX v1.1.1
+
+Version 1.1.0.6
+2014-05-06
+- Fixed issues with parsing Related Observables within an Incident
+- Adjusted names of data marking properties to align with list naming conventions
+
+Version 1.1.0.5
+2014-05-05
+- Controlled Vocabulary (stix.common.vocabs.VocabString) overhaul
+- All default STIX CV's have a corresponding VocabString derivation in stix.common.vocabs
+- Each VocabString implementation performs input validation
+- Each VocabString has static TERM_FOO values for each vocabulary term
+- CV fields can now accept user-defined VocabString implementations
+- Accepted Ubuntu installation documentation from @mgoldsborough, thanks!
+- Pluralized list fields where the naming makes sense
+- Adjusted many CV fields to promote plain strings to default CV type in property setter
+- Added exploit_targets, kill_chains to TTP
+- Added status to Campaign
+- Added motivations and identity to ThreatActor
+- Added kill_chain_phases, related_indicators to Indicator
+- Added FreeTextLine, ContactNumber to CIQ Identity extension
+- Added discovery_methods, security_compromise, information_source, related_incidents, coa_taken to Incident
+- Added profiles to STIXHeader
+- Initial cut at Sphinx documentation
+
+Version 1.1.0.4
+2014-02-31
+- Added COAs, Exploit Targets, Campaigns, and Related Packages to STIXPackage class
+- Updated behavior of id, idref, and timestamp on core STIX constructs to align with best practices
+- Added MAEC malware extension 
+- Improved Identity extension mechanism
+- Added Sightings to Indicator
+- Updates to OpenIOC test mechanism extension
+- Extensions now record input schemalocations on parse
+- Added Alternative_ID support to Indicator
+- Added support for Composite Indicator Expressions
+- Added Handling support to Indicator
+- Added several fields to COA and Exploit Target
+- Bug fixes
+ 
+Version 1.1.0.3
+2014-02-24
+- Added TTP structure (stix.ttp.TTP)
+- Added COA structure (stix.coa.CourseOfAction)
+- Added Campaign structure (stix.campaign.Campaign)
+- Added Exploit Target structure (stix.exploit_target.ExploitTarget)
+- Fixed bugs in CIQ extension classes
+- Fixed bugs in namespace/schemalocation generation code
+- Added *experimental* from_json() to base Entity class
+- Added EntityList class for managing lists of STIX constructs in a more-pythonic manner
+- Refactor of GenericRelationship and GenericRelationshipList classes
+- Refactor of imports to reduce the amount of in-line, function scoped imports
+- Added initial support for Snort Test Mechanism extension (stix.extensions.test_mechanism.snort_test_mechanism.SnortTestMechanism)
+- Added initial support for OpenIOC 2010 Test Mechanism (stix.extensions.test_mechanism.openioc_2010_test_mechanism.OpenIOCTestMechanism)
+- Updates to Indicator and Incident classes
+
+Version 1.1.0.2
+2014-02-25
+- Fixed bug where exception would be thrown if parsing defaults were unset
+- Added ETCompatXMLParser support to fix parsing bugs when XML comments were encountered
+- Addded huge_tree support to EntityParser
+
+Version 1.1.0.1
+2014-02-22
+- Added fields to Incident class
+- Added test for CIQ Identity extension
+- Fixed several CIQ Identity extension bugs
+- Improved namespace parser performance
+- Updated Incident test
+- Added initial code for better support of non-standard id namespaces in input documents 
+
+Version 1.1.0.0
+2014-02-20
+- Compatible with STIX v1.1
+- Refactored Data Marking code
+- Added support for TLP Marking, Simple Marking, and Terms of Use Marking
+- Added Handling support to STIXPackage
+- Removed more unneeded code from bindings
+- Added support for concrete ControlledVocabularyStringType instances
+- Added initial implementation of Incident class
+- Added initial implementation of Threat Actor class
+- Fixed interface issues between python-stix and python-cybox
+- Added tests for InformationSource, Confidence, Statement, and Data Marking tests
+- Added GenericRelationship class
+- Added EntityParser class which performs version and root element conformance checks prior to full parse
+- Added support for DateTimeWithPrecision
+- Added  RelatedIndicator class
+- Added support for Incident list in STIXPackage
+- Various bugfixes
+
+
+Version 1.0.1 Branch
+--------------------
+
+Version 1.0.1.1
+2014-02-12
+- Added more support for STIX v1.0.1
+- Added updated bindings for STIX v1.0.1
+- Updated extension bindings to leverage new STIX extension types and namespaces
+- Fixed bug in setup.py that caused invalid versions of python-cybox to be installed via pip
+- Accepted initial implementation of Data Markings pull request (thanks @zeroq!)
+- Accepted  bugfix pull requests (thanks @bgro!)
+- Major refactor to namespace parsing and generation code
+- Cleaned unused code from bindings
+- Refactored stix.utility module into package with idgen, nsparser modules
+
+Version 1.0.1.0
+2013-08-13
+- Initial support of STIX v1.0.1
+- Updated versioning policy
+- Fixed issue with CIQ Identity extension to_dict() call failing
+
+
+Version 1.0 Branch
+------------------
+
+Version 1.0.0a7
+2013-07-30
+- Various bug fixes
+
+Version 1.0.0a6
+2013-07-29
+- Added support for IndicatorType controlled vocabulary
+- Added support for huge_tree in bindings parser
+
+Version 1.0.0a5
+2013-06-27
+- Improved README documentation
+- Fixed interface issues between python-stix and python-cybox classes
+- Added support for additional namespaces to be added to STIXPackage.to_xml() 
+- Fixed installation issues with pip and setup.py
+
+Version 1.0.0a4
+2013-06-17
+- Added support for Observables under STIX_Packages
+- Fixed binding issues with Time element under Incident
+
+Version 1.0.0a3
+2013-05-122
+- Added support for Travis CI continuous integration service (thanks @2xyo!)
+- Fixed bugs that caused issues with Python 2.6
+- Added fields to STIXHeader
+- Added VocabString class
+
+Version 1.0.0a2
+2013-05-08
+- Compatible with STIX 1.0 (final)
+- Added ability to map namespaces to user-defined namespace aliases/prefixes
+- Various bugfixes
+
+Version 1.0.0a1
+2013-04-22
+- First (alpha) release on PyPI
+- Compatible with STIX 1.0 Draft 2

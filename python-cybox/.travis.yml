@@ -1,0 +1,37 @@
+language: python
+
+python:
+  - 3.5
+
+env:
+  - TOXENV=py26
+  - TOXENV=py27
+  - TOXENV=py33
+  - TOXENV=py34
+  - TOXENV=py35
+  - TOXENV=rhel6
+  - TOXENV=docs
+ 
+install:
+  # Cache Wheels for faster tests
+  - pip install -U pip wheel
+  - pip install -r requirements.txt
+  - pip install -U tox
+
+script:
+  - tox
+
+cache:
+  directories:
+    - $HOME/.cache/pip
+
+branches:
+  only:
+    - master
+
+notifications:
+  email:
+    - cybox-commits-list@lists.mitre.org
+
+# Ensure we use Travis's container-based architecture.
+sudo: false

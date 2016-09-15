@@ -8,11 +8,13 @@
 
 
 import argparse
-from threatintel.conversion import misp
 import pyaml
 import sys
 import json
 import os
+
+from threatintel.servers import misp
+from threatintel.converters import convert
 
 parser = argparse.ArgumentParser(description='Process some integers.')
 parser.add_argument('-o', '--outfile', help="The file to output to. Default is stdout")
@@ -61,12 +63,10 @@ if (args.file):
     # This is just a file conversion
     # Relatively quick and easy
     # Create a non-connected misp instance
-    MISP = misp.MISP(None, None)
-    
     try:
         with open(args.file, "r") as f:
             jsondata = f.read()
-        package = MISP.buildPackage(jsoninfo=json.loads(jsondata))
+        package = convert.MISPtoSTIX(jsondata)
     except FileNotFoundError:
         print("Could not open {}".format(args.file))
         sys.exit()

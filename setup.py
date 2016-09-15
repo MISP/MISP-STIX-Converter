@@ -12,7 +12,7 @@ setup(
         author = "Hannah Ward",
         author_email = "hannah.ward@baesystems.com",
         url = "https://github.com/FloatingGhost/MISP-STIX-Converter",
-        packages = ["threatintel", "threatintel.conversion"],       
+        packages = find_packages(),       
         scripts = ["threatintel/misp-to-stix.py", "threatintel/stix-to-misp.py"], 
         data_files = [(os.path.expanduser("~/.misptostix"),
                       ['misp.login.example'])]

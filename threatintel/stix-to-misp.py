@@ -8,13 +8,14 @@
 
 
 import argparse
-from threatintel.conversion import misp
 import pyaml
 import sys
 import json
-from stix.common import STIXPackage
 import base64
 import os
+
+from stix.common import STIXPackage
+from threatintel.servers import misp
 
 parser = argparse.ArgumentParser(description='Process some integers.')
 parser.add_argument("-c", "--config", help="Path to config file. Default is misp.login.")
