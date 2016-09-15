@@ -6,17 +6,26 @@ sync script. It's a bit limited, and it isn't perfect, nor is it bug-free.
 
 But it works™
 
+##Installation
+
+`sudo python3 setup.py install`
+
+This should install everything it needs!
+
+Useful, huh?
+
 ##Usage:
 
-First, add exec perms on the relevant files.
-
-`chmod +x misp-to-stix.py stix-to-misp.py`
+Once 
 
 ###The config file
 
 Copy over the example config to a live version
 
-`cp misp.login.example misp.login`
+The default location of this config file is at `~/.misptostx`, but this can be
+overridden with the `-c FILE` flag when running the scripts.
+
+`cp /path/to/config/misp.login.example /path/to/config/misp.login`
 
 Then open it and change the variables. This is YAML format, so make sure
 you don't do a silly and format it wrong!
@@ -25,11 +34,11 @@ you don't do a silly and format it wrong!
 
 To get all usage information:
 
-`./misp-to-stix.py -h`
+`misp-to-stix.py -h`
 
 So to convert a MISP JSON file to stix json, use
 
-`./misp-to-stix.py -f INFILE.json --format JSON -o OUTFILE.json`
+`misp-to-stix.py -f INFILE.json --format JSON -o OUTFILE.json`
 (the --format flag is used to specify output format, just for reference)
 
 And to pull a specific event from the MISP instance
