@@ -83,7 +83,7 @@ def STIXtoMISP(stix, mispAPI, **kwargs):
         except:
             # Ok then try loading from XML
             try:
-                stix = STIXPackage.from_xml(stix)
+                stix = STIXPackage().from_xml(stix)
             except:
                 # No joy. Quit.
                 raise STIXLoadError("Could not load stix file.")
