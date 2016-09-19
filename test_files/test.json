@@ -1,0 +1,384 @@
+{
+    "Event": {
+        "id": "5344",
+        "orgc_id": "3",
+        "org_id": "7",
+        "date": "2016-09-06",
+        "threat_level_id": "3",
+        "info": "Malspam 2016-09-06 (.js in .zip) - campaign: \"August invoice\"",
+        "published": true,
+        "uuid": "57ceb0ac-a22c-4bdd-835b-4404950d210f",
+        "attribute_count": "11",
+        "analysis": "0",
+        "timestamp": "1473163484",
+        "distribution": "3",
+        "proposal_email_lock": false,
+        "locked": true,
+        "publish_timestamp": "1473166049",
+        "sharing_group_id": "0",
+        "Org": {
+            "id": "7",
+            "name": "CERT-EU",
+            "uuid": "55f6ea65-acec-42b9-950d-4670950d210f"
+        },
+        "Orgc": {
+            "id": "3",
+            "name": "CIRCL",
+            "uuid": "55f6ea5e-2c60-40e5-964f-47a8950d210f"
+        },
+        "Attribute": [
+            {
+                "id": "474405",
+                "type": "domain",
+                "category": "Network activity",
+                "to_ids": true,
+                "uuid": "57ceb0bf-de58-44dc-a63e-4327950d210f",
+                "event_id": "5344",
+                "distribution": "5",
+                "timestamp": "1473163455",
+                "comment": "download location",
+                "sharing_group_id": "0",
+                "deleted": false,
+                "value": "bookinghotworld.ws",
+                "SharingGroup": [],
+                "ShadowAttribute": [],
+                "RelatedAttribute": [
+                    {
+                        "Attribute": {
+                            "id": "5345",
+                            "org_id": "7",
+                            "info": "Malspam 2016-09-06 (.js in .zip) - campaign: \"copies\"",
+                            "value": "bookinghotworld.ws"
+                        }
+                    },
+                    {
+                        "Attribute": {
+                            "id": "5317",
+                            "org_id": "7",
+                            "info": "Malspam 2016-09-01 (.js in .zip) - campaign: \"flight tickets\"",
+                            "value": "bookinghotworld.ws"
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "474406",
+                "type": "domain",
+                "category": "Network activity",
+                "to_ids": true,
+                "uuid": "57ceb0bf-a19c-4b3e-aacd-4239950d210f",
+                "event_id": "5344",
+                "distribution": "5",
+                "timestamp": "1473163455",
+                "comment": "download location",
+                "sharing_group_id": "0",
+                "deleted": false,
+                "value": "canonsupervideo4k.ws",
+                "SharingGroup": [],
+                "ShadowAttribute": [],
+                "RelatedAttribute": [
+                    {
+                        "Attribute": {
+                            "id": "5345",
+                            "org_id": "7",
+                            "info": "Malspam 2016-09-06 (.js in .zip) - campaign: \"copies\"",
+                            "value": "canonsupervideo4k.ws"
+                        }
+                    },
+                    {
+                        "Attribute": {
+                            "id": "5339",
+                            "org_id": "7",
+                            "info": "Malspam 2016-09-05 (.js in .zip) - campaign: \"Credit card receipt\"",
+                            "value": "canonsupervideo4k.ws"
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "474407",
+                "type": "domain",
+                "category": "Network activity",
+                "to_ids": true,
+                "uuid": "57ceb0c0-6ea8-408a-b23d-48e3950d210f",
+                "event_id": "5344",
+                "distribution": "5",
+                "timestamp": "1473163456",
+                "comment": "download location",
+                "sharing_group_id": "0",
+                "deleted": false,
+                "value": "donttouchmybaseline.ws",
+                "SharingGroup": [],
+                "ShadowAttribute": []
+            },
+            {
+                "id": "474408",
+                "type": "ip-dst",
+                "category": "Network activity",
+                "to_ids": true,
+                "uuid": "57ceb0bf-86c4-4e58-b477-4ed0950d210f",
+                "event_id": "5344",
+                "distribution": "5",
+                "timestamp": "1473163455",
+                "comment": "download location",
+                "sharing_group_id": "0",
+                "deleted": false,
+                "value": "216.244.68.195",
+                "SharingGroup": [],
+                "ShadowAttribute": [],
+                "RelatedAttribute": [
+                    {
+                        "Attribute": {
+                            "id": "5345",
+                            "org_id": "7",
+                            "info": "Malspam 2016-09-06 (.js in .zip) - campaign: \"copies\"",
+                            "value": "216.244.68.195"
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "474409",
+                "type": "url",
+                "category": "Network activity",
+                "to_ids": true,
+                "uuid": "57ceb0c0-db48-43fe-b866-4f55950d210f",
+                "event_id": "5344",
+                "distribution": "5",
+                "timestamp": "1473163456",
+                "comment": "download location",
+                "sharing_group_id": "0",
+                "deleted": false,
+                "value": "http:\/\/bookinghotworld.ws\/7m35qn",
+                "SharingGroup": [],
+                "ShadowAttribute": []
+            },
+            {
+                "id": "474410",
+                "type": "url",
+                "category": "Network activity",
+                "to_ids": true,
+                "uuid": "57ceb0c0-8048-4536-9e05-4959950d210f",
+                "event_id": "5344",
+                "distribution": "5",
+                "timestamp": "1473163456",
+                "comment": "download location",
+                "sharing_group_id": "0",
+                "deleted": false,
+                "value": "http:\/\/canonsupervideo4k.ws\/87rhku3",
+                "SharingGroup": [],
+                "ShadowAttribute": []
+            },
+            {
+                "id": "474411",
+                "type": "url",
+                "category": "Network activity",
+                "to_ids": true,
+                "uuid": "57ceb0c0-0bac-4e67-868d-4451950d210f",
+                "event_id": "5344",
+                "distribution": "5",
+                "timestamp": "1473163456",
+                "comment": "download location",
+                "sharing_group_id": "0",
+                "deleted": false,
+                "value": "http:\/\/darkestzone2.wang\/9zh9my4",
+                "SharingGroup": [],
+                "ShadowAttribute": []
+            },
+            {
+                "id": "474412",
+                "type": "url",
+                "category": "Network activity",
+                "to_ids": true,
+                "uuid": "57ceb0c1-34c4-48c4-8726-4f01950d210f",
+                "event_id": "5344",
+                "distribution": "5",
+                "timestamp": "1473163457",
+                "comment": "download location",
+                "sharing_group_id": "0",
+                "deleted": false,
+                "value": "http:\/\/donttouchmybaseline.ws\/fax8x",
+                "SharingGroup": [],
+                "ShadowAttribute": []
+            },
+            {
+                "id": "474413",
+                "type": "url",
+                "category": "Network activity",
+                "to_ids": true,
+                "uuid": "57ceb0c1-5150-4216-ae04-4990950d210f",
+                "event_id": "5344",
+                "distribution": "5",
+                "timestamp": "1473163457",
+                "comment": "download location",
+                "sharing_group_id": "0",
+                "deleted": false,
+                "value": "http:\/\/tradesmartcoin.xyz\/k7w8qhi",
+                "SharingGroup": [],
+                "ShadowAttribute": []
+            },
+            {
+                "id": "474414",
+                "type": "filename",
+                "category": "Payload delivery",
+                "to_ids": true,
+                "uuid": "57ceb0c0-20c8-426a-8678-45c0950d210f",
+                "event_id": "5344",
+                "distribution": "5",
+                "timestamp": "1473163456",
+                "comment": "download location",
+                "sharing_group_id": "0",
+                "deleted": false,
+                "value": "darkestzone2.wang",
+                "SharingGroup": [],
+                "ShadowAttribute": [],
+                "RelatedAttribute": [
+                    {
+                        "Attribute": {
+                            "id": "5345",
+                            "org_id": "7",
+                            "info": "Malspam 2016-09-06 (.js in .zip) - campaign: \"copies\"",
+                            "value": "darkestzone2.wang"
+                        }
+                    },
+                    {
+                        "Attribute": {
+                            "id": "5339",
+                            "org_id": "7",
+                            "info": "Malspam 2016-09-05 (.js in .zip) - campaign: \"Credit card receipt\"",
+                            "value": "darkestzone2.wang"
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "474415",
+                "type": "filename",
+                "category": "Payload delivery",
+                "to_ids": true,
+                "uuid": "57ceb0c1-fe30-4fb6-a296-4113950d210f",
+                "event_id": "5344",
+                "distribution": "5",
+                "timestamp": "1473163457",
+                "comment": "download location",
+                "sharing_group_id": "0",
+                "deleted": false,
+                "value": "tradesmartcoin.xyz",
+                "SharingGroup": [],
+                "ShadowAttribute": [],
+                "RelatedAttribute": [
+                    {
+                        "Attribute": {
+                            "id": "5345",
+                            "org_id": "7",
+                            "info": "Malspam 2016-09-06 (.js in .zip) - campaign: \"copies\"",
+                            "value": "tradesmartcoin.xyz"
+                        }
+                    },
+                    {
+                        "Attribute": {
+                            "id": "5339",
+                            "org_id": "7",
+                            "info": "Malspam 2016-09-05 (.js in .zip) - campaign: \"Credit card receipt\"",
+                            "value": "tradesmartcoin.xyz"
+                        }
+                    }
+                ]
+            }
+        ],
+        "ShadowAttribute": [],
+        "RelatedEvent": [
+            {
+                "Event": {
+                    "id": "5345",
+                    "date": "2016-09-06",
+                    "threat_level_id": "3",
+                    "info": "Malspam 2016-09-06 (.js in .zip) - campaign: \"copies\"",
+                    "published": true,
+                    "uuid": "57ceb43f-b180-449b-a0d6-4afe950d210f",
+                    "analysis": "0",
+                    "timestamp": "1473164373",
+                    "distribution": "3",
+                    "org_id": "7",
+                    "orgc_id": "3"
+                },
+                "Org": {
+                    "id": "7",
+                    "name": "CERT-EU",
+                    "uuid": "55f6ea65-acec-42b9-950d-4670950d210f"
+                },
+                "Orgc": {
+                    "id": "3",
+                    "name": "CIRCL",
+                    "uuid": "55f6ea5e-2c60-40e5-964f-47a8950d210f"
+                }
+            },
+            {
+                "Event": {
+                    "id": "5339",
+                    "date": "2016-09-05",
+                    "threat_level_id": "3",
+                    "info": "Malspam 2016-09-05 (.js in .zip) - campaign: \"Credit card receipt\"",
+                    "published": true,
+                    "uuid": "57cd5a06-59e0-44a8-9200-3306950d210f",
+                    "analysis": "0",
+                    "timestamp": "1473076199",
+                    "distribution": "3",
+                    "org_id": "7",
+                    "orgc_id": "3"
+                },
+                "Org": {
+                    "id": "7",
+                    "name": "CERT-EU",
+                    "uuid": "55f6ea65-acec-42b9-950d-4670950d210f"
+                },
+                "Orgc": {
+                    "id": "3",
+                    "name": "CIRCL",
+                    "uuid": "55f6ea5e-2c60-40e5-964f-47a8950d210f"
+                }
+            },
+            {
+                "Event": {
+                    "id": "5317",
+                    "date": "2016-09-01",
+                    "threat_level_id": "3",
+                    "info": "Malspam 2016-09-01 (.js in .zip) - campaign: \"flight tickets\"",
+                    "published": true,
+                    "uuid": "57c7d398-3440-41b9-8339-4e1e950d210f",
+                    "analysis": "0",
+                    "timestamp": "1472713799",
+                    "distribution": "3",
+                    "org_id": "7",
+                    "orgc_id": "3"
+                },
+                "Org": {
+                    "id": "7",
+                    "name": "CERT-EU",
+                    "uuid": "55f6ea65-acec-42b9-950d-4670950d210f"
+                },
+                "Orgc": {
+                    "id": "3",
+                    "name": "CIRCL",
+                    "uuid": "55f6ea5e-2c60-40e5-964f-47a8950d210f"
+                }
+            }
+        ],
+        "Tag": [
+            {
+                "id": "4",
+                "name": "tlp:white",
+                "colour": "#00d622",
+                "exportable": true,
+                "org_id": "0"
+            },
+            {
+                "id": "9",
+                "name": "circl:incident-classification=\"malware\"",
+                "colour": "#3d7a00",
+                "exportable": true,
+                "org_id": "0"
+            }
+        ]
+    }
+}

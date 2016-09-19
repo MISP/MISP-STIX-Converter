@@ -2,7 +2,5 @@
 *.egg-info
 build/
 dist/
-test.*
-test.json
 __pycache__
 misp.login
