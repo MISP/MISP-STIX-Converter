@@ -2,7 +2,7 @@
 
 import json
 
-class MISPLoadError(json.decoder.JSONDecodeError):
+class MISPLoadError(Exception):
     pass
 
 class STIXLoadError(Exception):

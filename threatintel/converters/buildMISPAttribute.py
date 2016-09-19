@@ -57,6 +57,9 @@ def buildEvent(pkg, mispAPI, **kwargs):
     for obj in lintRoll(pkg):
         # This will find literally every object ever.
         buildAttribute(obj, event, mispAPI)
+    e2 = mispAPI.get(event["Event"]["id"])
+    if len(e2["Event"]["Attribute"]) == 0:
+        mispAPI.delete_event(event["Event"]["id"])
 
 def buildAttribute(pkg, mispEvent, mispAPI):
     try:

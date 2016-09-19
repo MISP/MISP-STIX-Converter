@@ -7,7 +7,9 @@
 import logging
 import json
 import sys
+from tempfile import NamedTemporaryFile
 
+from xml.etree import ElementTree
 # Stix imports
 from stix.core import STIXPackage
 from stix.core import STIXHeader
@@ -34,7 +36,10 @@ def MISPtoSTIX(mispJSON):
             mispJSON = json.loads(mispJSON)
         except json.decoder.JSONDecodeError:
             # We couldn't make head nor tail of it
-            raise MISPLoadError("COULD NOT LOAD MISP JSON!")
+            try:
+                mispJSON = json.load(mispJSON)
+            except:
+                raise MISPLoadError("COULD NOT LOAD MISP JSON!")
 
     # We should now have a proper MISP JSON loaded.
     
@@ -74,19 +79,23 @@ def STIXtoMISP(stix, mispAPI, **kwargs):
     """
 
     log.info("Converting a package from STIX to MISP...")
-
+    # Just save the pain and load it if the first character is a <
+    
     if not isinstance(stix, STIXPackage):
+        f = NamedTemporaryFile(mode="w+")
+        f.write(stix)
+        f.seek(0)
         # Oh no we have to try and load it now
         try:
             # Try loading from JSON
-            stix = STIXPackage().from_json(stix)
+            stix = STIXPackage().from_json(f.name)
         except:
             # Ok then try loading from XML
             try:
-                stix = STIXPackage().from_xml(stix)
-            except:
+                stix = STIXPackage().from_xml(f.name)
+            except Exception as ex:
                 # No joy. Quit.
-                raise STIXLoadError("Could not load stix file.")
+                raise STIXLoadError("Could not load stix file. {}".format(ex))
     
     # Ok by now we should have a proper STIX object.
     return buildMISPAttribute.buildEvent(stix, mispAPI) 
