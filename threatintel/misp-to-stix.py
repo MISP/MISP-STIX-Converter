@@ -10,7 +10,6 @@
 import argparse
 import pyaml
 import sys
-import json
 import os
 
 from threatintel.servers import misp
@@ -72,7 +71,7 @@ if (args.file):
     except FileNotFoundError:
         print("Could not open {}".format(args.file))
         sys.exit()
-        
+
 else:
     # This requires a connection to MISP
     # As we need to pull an event
@@ -85,13 +84,13 @@ else:
 if args.stix_version:
     if args.stix_version == "1.1.1":
         objs = lint_roller.lintRoll(package)
-        for i in obs:
+        for i in objs:
             # Set the object's version
             if hasattr(i, "version"):
                 i.version = args.stix_version
 
     elif args.stix_version == "1.2":
-        pass #Is default
+        pass  # Is default
     else:
         print("INVALID STIX VERSION {}".format(args.stix_version))
         sys.exit()
@@ -114,4 +113,3 @@ else:
         # Output to file
         with open(args.outfile, "wb") as f:
             f.write(package.to_xml())
-

@@ -6,26 +6,25 @@
 # Sys imports
 import logging
 import json
-import sys
 from tempfile import NamedTemporaryFile
 
-from xml.etree import ElementTree
 # Stix imports
 from stix.core import STIXPackage
 from stix.core import STIXHeader
-from stix.indicator import Indicator, Observable
+from stix.indicator import Indicator
 
 # Local imports
-from threatintel.errors import *
+from threatintel.errors import MISPLoadError, STIXLoadError
 from threatintel.converters import buildSTIXAttribute
 from threatintel.converters import buildMISPAttribute
 
 log = logging.getLogger("__main__")
 
+
 def MISPtoSTIX(mispJSON):
     """
         Function to convert from a MISP JSON to a STIX stix
-        
+
         :param mispJSON: A dict (json) containing a misp Event.
         :returns stix: A STIX stix with as much of the original
                           data as we could convert.
@@ -42,10 +41,10 @@ def MISPtoSTIX(mispJSON):
                 raise MISPLoadError("COULD NOT LOAD MISP JSON!")
 
     # We should now have a proper MISP JSON loaded.
-    
+
     # Create a base stix
     stix = STIXPackage()
-    
+
     # Create a header for the new stix
     stix.stix_header = STIXHeader()
 
@@ -54,12 +53,12 @@ def MISPtoSTIX(mispJSON):
         stix.stix_header.title = mispJSON["Event"]["info"]
     else:
         # We don't have an easy name for it
-        stix.stix_header.title = "MISP Export" 
+        stix.stix_header.title = "MISP Export"
         # Best we can do really
-    
+
     # Get the event Attributes
-    attributes =  mispJSON["Event"]["Attribute"]
-    
+    attributes = mispJSON["Event"]["Attribute"]
+
     # We're going to store our observables inside an indicator
     indicator = Indicator()
 
@@ -70,17 +69,18 @@ def MISPtoSTIX(mispJSON):
     stix.add_indicator(indicator)
     return stix
 
+
 def STIXtoMISP(stix, mispAPI, **kwargs):
     """
         Function to convert from something stixxy ( as we have 3 possible representations )
-        to something mispy. Specifically JSON. Because XML is satan. 
-        
+        to something mispy. Specifically JSON. Because XML is satan.
+
         :param stix: Something stixxy.
     """
 
     log.info("Converting a package from STIX to MISP...")
     # Just save the pain and load it if the first character is a <
-    
+
     if not isinstance(stix, STIXPackage):
         f = NamedTemporaryFile(mode="w+")
         f.write(stix)
@@ -96,6 +96,6 @@ def STIXtoMISP(stix, mispAPI, **kwargs):
             except Exception as ex:
                 # No joy. Quit.
                 raise STIXLoadError("Could not load stix file. {}".format(ex))
-    
+
     # Ok by now we should have a proper STIX object.
-    return buildMISPAttribute.buildEvent(stix, mispAPI) 
+    return buildMISPAttribute.buildEvent(stix, mispAPI)

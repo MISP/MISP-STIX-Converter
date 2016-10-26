@@ -2,6 +2,7 @@
 
 # A method to get allllll objects out of a STIX package.
 
+
 def lintRoll(pkg):
     # Make sure it'll return itself
     objs = [pkg]
@@ -10,4 +11,3 @@ def lintRoll(pkg):
         for x in pkg.walk():
             objs += lintRoll(x)
     return objs
-
