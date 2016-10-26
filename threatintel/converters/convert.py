@@ -5,8 +5,9 @@
 # Imports
 # Sys imports
 import logging
-import json
 from tempfile import NamedTemporaryFile
+
+from pymisp import mispevent
 
 # Stix imports
 from stix.core import STIXPackage
@@ -14,7 +15,7 @@ from stix.core import STIXHeader
 from stix.indicator import Indicator
 
 # Local imports
-from threatintel.errors import MISPLoadError, STIXLoadError
+from threatintel.errors import STIXLoadError
 from threatintel.converters import buildSTIXAttribute
 from threatintel.converters import buildMISPAttribute
 
@@ -29,17 +30,8 @@ def MISPtoSTIX(mispJSON):
         :returns stix: A STIX stix with as much of the original
                           data as we could convert.
     """
-    if not isinstance(mispJSON, dict):
-        # It's likely not a loaded JSON. Attempt to load it.
-        try:
-            mispJSON = json.loads(mispJSON)
-        except json.decoder.JSONDecodeError:
-            # We couldn't make head nor tail of it
-            try:
-                mispJSON = json.load(mispJSON)
-            except:
-                raise MISPLoadError("COULD NOT LOAD MISP JSON!")
-
+    misp_event = mispevent.MISPEvent()
+    misp_event.load(mispJSON)
     # We should now have a proper MISP JSON loaded.
 
     # Create a base stix
@@ -49,21 +41,13 @@ def MISPtoSTIX(mispJSON):
     stix.stix_header = STIXHeader()
 
     # Try to use the event title as the stix title
-    if "info" in mispJSON:
-        stix.stix_header.title = mispJSON["Event"]["info"]
-    else:
-        # We don't have an easy name for it
-        stix.stix_header.title = "MISP Export"
-        # Best we can do really
-
-    # Get the event Attributes
-    attributes = mispJSON["Event"]["Attribute"]
+    stix.stix_header.title = misp_event.info
 
     # We're going to store our observables inside an indicator
     indicator = Indicator()
 
     # Go through each attribute and transfer what we can.
-    for one_attrib in attributes:
+    for one_attrib in misp_event.attributes:
         # Build an attribute from the JSON. Is all nice.
         buildSTIXAttribute.buildAttribute(one_attrib, stix, indicator)
     stix.add_indicator(indicator)
