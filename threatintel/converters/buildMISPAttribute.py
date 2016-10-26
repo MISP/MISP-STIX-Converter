@@ -3,6 +3,9 @@ import re
 import cybox
 import logging
 import hashlib
+import json
+
+from pymisp import mispevent
 
 from threatintel.converters.lint_roller import lintRoll
 
@@ -45,21 +48,24 @@ def buildEvent(pkg, mispAPI, **kwargs):
         else:
             title = pkg.stix_header.title
     log.info(title)
-    event = mispAPI.new_event(distribution=kwargs.get("distribution", 0),
-                              threat_level_id=kwargs.get("threat_level_id", 3),
-                              analysis=kwargs.get("analysis", 0),
-                              info=title
-                              )
+    event = mispevent.MISPEvent()
+    event.distribution = kwargs.get("distribution", 0)
+    event.threat_level_id = kwargs.get("threat_level_id", 3)
+    event.analysis = kwargs.get("analysis", 0)
+    event.info = title
 
     for obj in lintRoll(pkg):
         # This will find literally every object ever.
-        buildAttribute(obj, event, mispAPI)
-    e2 = mispAPI.get(event["Event"]["id"])
-    if len(e2["Event"]["Attribute"]) == 0:
-        mispAPI.delete_event(event["Event"]["id"])
+        event = buildAttribute(obj, event)
+    if event.attributes:
+        response = mispAPI.add_event(json.dumps(event, cls=mispevent.EncodeUpdate))
+        if response.get('errors'):
+            # FIXME *maybe* we want to raise a thing there....
+            pass
+            # raise Exception(response.get('errors'))
 
 
-def buildAttribute(pkg, mispEvent, mispAPI):
+def buildAttribute(pkg, mispEvent):
     try:
         # Check if the object is a cybox observable
         if type(pkg) == cybox.core.observable.Observable:
@@ -72,26 +78,24 @@ def buildAttribute(pkg, mispEvent, mispAPI):
                     # We've got an address object, naturally
                     # We can check if it's a source or dest
                     if obj.is_source:
-                        mispAPI.add_ipsrc(mispEvent, obj.address_value.value,
-                                          comment=pkg.title or "IP Source")
-
+                        mispEvent.add_attribute('ip-src', obj.address_value.value,
+                                                comment=pkg.title or "IP Source")
                     elif obj.is_destination:
-                        mispAPI.add_ipdst(mispEvent, obj.address_value.value,
-                                          comment=pkg.title or "IP Dest")
+                        mispEvent.add_attribute('ip-dst', obj.address_value.value,
+                                                comment=pkg.title or "IP Dest")
                     else:
                         # Don't have anything to go on
-                        mispAPI.add_ipdst(mispEvent, obj.address_value.value,
-                                          comment=pkg.title or "IP Addr")
-
+                        mispEvent.add_attribute('ip-dst', obj.address_value.value,
+                                                comment=pkg.title or "IP Addr")
                 elif type_ == domain_name_object.DomainName:
-                    mispAPI.add_domain(mispEvent, obj.value, comment=pkg.title or "Domain")
-
+                    mispEvent.add_attribute('domain', obj.value,
+                                            comment=pkg.title or "Domain")
                 elif type_ == hostname_object.Hostname:
-                    mispAPI.add_hostname(mispEvent, obj.hostname_value, comment=pkg.title or "Hostname")
-
+                    mispEvent.add_attribute('hostname', obj.hostname_value,
+                                            comment=pkg.title or "Hostname")
                 elif type_ == uri_object.URI:
-                    mispAPI.add_url(mispEvent, obj.value, comment=pkg.title or "URI")
-
+                    mispEvent.add_attribute('url', obj.value.value,
+                                            comment=pkg.title or "Hostname")
                 elif type_ == file_object.File:
                     # This is a bit harder
                     # TODO: This
@@ -101,38 +105,30 @@ def buildAttribute(pkg, mispEvent, mispAPI):
                     if obj.header:
                         # We have a header, can check for to/from etc etc
                         if obj.header.from_:
-                            mispAPI.add_email_src(mispEvent, obj.header.from_, comment="Email From Addr")
+                            mispEvent.add_attribute('email-src', obj.header.from_, comment="Email From Addr")
                         if obj.header.to:
-                            mispAPI.add_email_dst(mispEvent, obj.header.to, comment="Email to Addr")
+                            mispEvent.add_attribute('email-dst', obj.header.to, comment="Email to Addr")
                         if obj.header.subject:
-                            mispAPI.add_email_subject(mispEvent, obj.header.subject, comment="Email Sub")
-                    if emsg.attachments:  # FIXME Broken
-                        for att in emsg.attachments:
-                            mispAPI.add_email_attachment(mispEvent, att, comment="Email Attachment")
-
+                            mispEvent.add_attribute('email-subject', obj.header.subject.value, comment="Email Sub")
+                    if obj.attachments:
+                        for att in obj.attachments:
+                            mispEvent.add_attribute('email-attachment', att.value, comment="Email Attachment")
                 elif type_ == mutex_object.Mutex:
-                    mispAPI.add_mutex(mispEvent, obj.name, comment=pkg.title or "MUTEX")
-
+                    mispEvent.add_attribute('mutex', obj.name, comment=pkg.title or "MUTEX")
                 elif type_ == whois_object.WhoisEntry:
                     pass
-
                 elif type_ == win_registry_key_object.WinRegistryKey:
                     pass
-
                 elif type_ == network_packet_object.NetworkPacket:
                     pass
-
                 elif type_ == http_session_object.HTTPSession:
                     pass
-
                 elif type_ == pipe_object.Pipe:
-                    # Not supported
+                    # FIXME supported
                     log.debug("Named Pipe not supported by API.")
-
                 elif type_ == as_object.AS:
-                    # Not supposed by API
+                    # FIXME supported
                     log.debug("AS Attribute not supported by API.")
-
                 else:
                     log.debug("Type not syncing {}".format(type_))
             else:
@@ -141,3 +137,4 @@ def buildAttribute(pkg, mispEvent, mispAPI):
             pass  # Other objects. TODO.
     except Exception as ex:
         log.error(ex)
+    return mispEvent
