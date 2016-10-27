@@ -13,7 +13,7 @@ import sys
 import os
 
 from stix.core import STIXPackage
-from threatintel.servers import misp
+from misp_stix_converter.servers import misp
 
 parser = argparse.ArgumentParser(description='Process some integers.')
 parser.add_argument("-c", "--config", help="Path to config file. Default is misp.login.")

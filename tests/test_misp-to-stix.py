@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from threatintel.converters import convert
+from misp_stix_converter.converters import convert
 
 
 def test_convert():

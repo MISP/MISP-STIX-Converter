@@ -12,7 +12,7 @@
 import requests
 import pymisp
 import logging
-from threatintel.converters import convert
+from misp_stix_converter.converters import convert
 
 __author__ = "Hannah Ward"
 
