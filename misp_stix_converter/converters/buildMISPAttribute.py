@@ -8,6 +8,8 @@ from pymisp import mispevent
 
 from misp_stix_converter.converters.lint_roller import lintRoll
 
+from stix.core import STIXPackage
+
 # Cybox cybox don't we all love cybox children
 from cybox.objects import email_message_object, file_object, address_object
 from cybox.objects import domain_name_object, hostname_object, uri_object
@@ -35,6 +37,22 @@ def identifyHash(hsh):
             possible_hashes.append(h)
             possible_hashes.append("filename|{}".format(h))
     return possible_hashes
+
+
+def open_stix(stix_thing):
+    # Load the package
+    if not hasattr(stix_thing, 'read'):
+        stix_thing = open(stix_thing, "r")
+
+    pkg = None
+    try:
+        pkg = STIXPackage().from_xml(stix_thing)
+    except:
+        try:
+            pkg = STIXPackage.from_json(stix_thing)
+        except:
+            raise Exception("Could not load package!")
+    return pkg
 
 
 def buildEvent(pkg, **kwargs):

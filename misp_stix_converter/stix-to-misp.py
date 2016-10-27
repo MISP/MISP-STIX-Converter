@@ -12,8 +12,8 @@ import pyaml
 import sys
 import os
 
-from stix.core import STIXPackage
 from misp_stix_converter.servers import misp
+from misp_stix_converter.converters.buildMISPAttribute import open_stix
 
 parser = argparse.ArgumentParser(description='Process some integers.')
 parser.add_argument("-c", "--config", help="Path to config file. Default is misp.login.")
@@ -38,15 +38,8 @@ except FileNotFoundError:
 # Relatively quick and easy
 MISP = misp.MISP(CONFIG["MISP"]["URL"], CONFIG["MISP"]["KEY"])
 
-# We'll use my nice little misp module
 # Load the package
-try:
-    pkg = STIXPackage().from_xml(open(args.file, "r"))
-except:
-    try:
-        pkg = STIXPackage.from_json(open(args.file, "r"))
-    except:
-        print("Could not load package!")
-        sys.exit(1)
+pkg = open_stix(args._file)
 
+# We'll use my nice little misp module
 MISP.push(pkg)
