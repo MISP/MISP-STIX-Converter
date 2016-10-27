@@ -3,6 +3,7 @@ import glob
 from threatintel.converters import convert
 from threatintel.servers import misp
 
+
 def test_convert():
     # This is a public MISP instance.
     # Just running on AWS, nothing particularly interesting.

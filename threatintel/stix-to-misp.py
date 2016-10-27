@@ -10,8 +10,6 @@
 import argparse
 import pyaml
 import sys
-import json
-import base64
 import os
 
 from stix.core import STIXPackage
@@ -43,7 +41,7 @@ MISP = misp.MISP(CONFIG["MISP"]["URL"], CONFIG["MISP"]["KEY"])
 # We'll use my nice little misp module
 # Load the package
 try:
-    pkg = STIXPackage().from_xml(open(args.file, "r")) 
+    pkg = STIXPackage().from_xml(open(args.file, "r"))
 except:
     try:
         pkg = STIXPackage.from_json(open(args.file, "r"))
