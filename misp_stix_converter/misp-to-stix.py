@@ -12,9 +12,9 @@ import pyaml
 import sys
 import os
 
-from threatintel.servers import misp
-from threatintel.converters import convert
-from threatintel.converters import lint_roller
+from misp_stix_converter.servers import misp
+from misp_stix_converter.converters import convert
+from misp_stix_converter.converters import lint_roller
 
 parser = argparse.ArgumentParser(description='Process some integers.')
 parser.add_argument('-o', '--outfile', help="The file to output to. Default is stdout")

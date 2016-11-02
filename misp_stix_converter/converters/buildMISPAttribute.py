@@ -3,11 +3,12 @@ import re
 import cybox
 import logging
 import hashlib
-import json
 
 from pymisp import mispevent
 
-from threatintel.converters.lint_roller import lintRoll
+from misp_stix_converter.converters.lint_roller import lintRoll
+
+from stix.core import STIXPackage
 
 # Cybox cybox don't we all love cybox children
 from cybox.objects import email_message_object, file_object, address_object
@@ -38,7 +39,23 @@ def identifyHash(hsh):
     return possible_hashes
 
 
-def buildEvent(pkg, mispAPI, **kwargs):
+def open_stix(stix_thing):
+    # Load the package
+    if not hasattr(stix_thing, 'read'):
+        stix_thing = open(stix_thing, "r")
+
+    pkg = None
+    try:
+        pkg = STIXPackage().from_xml(stix_thing)
+    except:
+        try:
+            pkg = STIXPackage.from_json(stix_thing)
+        except:
+            raise Exception("Could not load package!")
+    return pkg
+
+
+def buildEvent(pkg, **kwargs):
     log.info("Building Event...")
     if not pkg.stix_header:
         title = "STIX Import"
@@ -57,12 +74,7 @@ def buildEvent(pkg, mispAPI, **kwargs):
     for obj in lintRoll(pkg):
         # This will find literally every object ever.
         event = buildAttribute(obj, event)
-    if event.attributes:
-        response = mispAPI.add_event(json.dumps(event, cls=mispevent.EncodeUpdate))
-        if response.get('errors'):
-            # FIXME *maybe* we want to raise a thing there....
-            pass
-            # raise Exception(response.get('errors'))
+    return event
 
 
 def buildAttribute(pkg, mispEvent):

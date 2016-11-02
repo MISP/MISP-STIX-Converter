@@ -1,10 +1,10 @@
 [run]
 branch = True
-source = threatintel
+source = misp_stix_converter
 
 [report]
 include =
-    threatintel/*
+    misp_stix_converter/*
 exclude_lines =
     pragma: no cover
     raise NotImplementedError
