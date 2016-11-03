@@ -39,7 +39,7 @@ except FileNotFoundError:
 MISP = misp.MISP(CONFIG["MISP"]["URL"], CONFIG["MISP"]["KEY"])
 
 # Load the package
-pkg = open_stix(args._file)
+pkg = open_stix(args.file)
 
 # We'll use my nice little misp module
 MISP.push(pkg)
