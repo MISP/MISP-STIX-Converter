@@ -72,7 +72,15 @@ def buildEvent(pkg, **kwargs):
     event.analysis = kwargs.get("analysis", 0)
     event.info = title
 
+    ids = []
+    to_process = []
     for obj in lintRoll(pkg):
+        if isinstance(obj, cybox.core.observable.Observable):
+            if obj.id_ not in ids:
+                ids.append(obj.id_)
+                to_process.append(obj)
+
+    for obj in to_process:
         # This will find literally every object ever.
         event = buildAttribute(obj, event)
     return event
@@ -81,7 +89,7 @@ def buildEvent(pkg, **kwargs):
 def buildAttribute(pkg, mispEvent):
     try:
         # Check if the object is a cybox observable
-        if type(pkg) == cybox.core.observable.Observable:
+        if isinstance(pkg, cybox.core.observable.Observable):
             if hasattr(pkg, "object_") and pkg.object_:
                 obj = pkg.object_.properties
                 # It's a proper object!
