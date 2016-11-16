@@ -101,7 +101,7 @@ def buildAttribute(pkg, mispEvent):
                         mispEvent.add_attribute('ip-dst', six.text_type(obj.address_value),
                                                 comment=pkg.title or "")
                 elif type_ == domain_name_object.DomainName:
-                    mispEvent.add_attribute('domain', six.text_type(obj), comment=pkg.title or "")
+                    mispEvent.add_attribute('domain', six.text_type(obj.value), comment=pkg.title or "")
                 elif type_ == hostname_object.Hostname:
                     mispEvent.add_attribute('hostname', six.text_type(obj.hostname_value),
                                             comment=pkg.title or "")
