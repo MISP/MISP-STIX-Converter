@@ -6,7 +6,7 @@ from setuptools import setup
 import os
 
 setup(
-    name="Stix<->MISP Converter",
+    name="misp_stix_converter",
     description="A tool to convert between STIX and MISP format",
     version="0.2",
     author="Hannah Ward",
