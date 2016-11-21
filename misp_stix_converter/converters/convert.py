@@ -5,7 +5,7 @@
 # Imports
 # Sys imports
 import logging
-from tempfile import NamedTemporaryFile
+from tempfile import SpooledTemporaryFile, NamedTemporaryFile
 import json
 
 from pymisp import mispevent
@@ -63,23 +63,44 @@ def load_stix(stix):
     # Just save the pain and load it if the first character is a <
 
     if isinstance(stix, STIXPackage):
+        # Oh cool we're ok 
+        # Who tried to load this? Honestly.
         return stix
 
-    f = NamedTemporaryFile(mode="w+")
-    f.write(stix)
-    f.seek(0)
-    # Oh no we have to try and load it now
-    try:
-        # Try loading from JSON
-        stix_package = STIXPackage().from_json(f.name)
-    except:
-        # Ok then try loading from XML
+    elif hasattr(stix, 'read'):
+        # It's a file!
         try:
-            stix_package = STIXPackage().from_xml(f.name)
-        except Exception as ex:
-            # No joy. Quit.
-            raise STIXLoadError("Could not load stix file. {}".format(ex))
-    return stix_package
+            # Try loading from JSON
+            stix_package = STIXPackage.from_json(stix)
+        except:
+            # Ok then try loading from XML
+            # Loop zoop
+            stix.seek(0)
+            try:
+                stix_package = STIXPackage.from_xml(stix)
+            except Exception as ex:
+                # No joy. Quit.
+                raise STIXLoadError("Could not load stix file. {}".format(ex))
+
+        return stix_package
+
+    elif isinstance(stix, str):
+        # It's text, we'll need to use a temporary file  
+        
+        # Create a temporary file to load from 
+        f = SpooledTemporaryFile()
+        
+        # O I have idea for sneak
+        # Will be very sneak
+
+        # Write the (probably) XML to file
+        f.write(stix.encode("utf-8"))
+
+        # Reset the file so we can read from it
+        f.seek(0)
+
+        # AHA SNEAK DIDN'T EXPECT RECURSION DID YOU
+        return load_stix(f)
 
 
 def STIXtoMISP(stix, mispAPI, **kwargs):
