@@ -19,6 +19,4 @@ setup(
                       "https://github.com/STIXProject/python-stix.git",
                       "https://github.com/CybOXProject/python-cybox.git"],
     scripts=["misp_stix_converter/misp-to-stix.py", "misp_stix_converter/stix-to-misp.py"],
-    data_files=[(os.path.expanduser("~/.misptostix"),
-                ['misp.login.example'])]
 )
