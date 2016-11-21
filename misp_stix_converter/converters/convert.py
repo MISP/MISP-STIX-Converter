@@ -87,8 +87,10 @@ def load_stix(stix):
     elif isinstance(stix, str):
         # It's text, we'll need to use a temporary file  
         
-        # Create a temporary file to load from 
-        f = SpooledTemporaryFile()
+        # Create a temporary file to load from
+        # Y'know I should probably give it a max size before jumping to disk
+        # idk, 10MB? Sounds reasonable. 
+        f = SpooledTemporaryFile(max_size=10*1024)
         
         # O I have idea for sneak
         # Will be very sneak
