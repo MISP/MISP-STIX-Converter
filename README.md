@@ -20,7 +20,7 @@ git repo wherever possible/
 
 ```
 sudo python3 setup.py install
-``
+```
 
 This should install everything it needs!
 
