@@ -11,7 +11,16 @@ But it works™
 
 ##Installation
 
-`sudo python3 setup.py install`
+If you don't wanna use git, 
+```bash
+sudo pip3 install misp_stix_converter
+```
+should have you covered. This relies on me actually updating PyPI every time I update the project, so I'd use the 
+git repo wherever possible/
+
+```
+sudo python3 setup.py install
+``
 
 This should install everything it needs!
 
