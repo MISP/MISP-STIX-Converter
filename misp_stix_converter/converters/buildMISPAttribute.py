@@ -100,47 +100,53 @@ def buildAttribute(pkg, mispEvent):
                     # We can check if it's a source or dest
                     if obj.is_source:
                         mispEvent.add_attribute('ip-src', six.text_type(obj.address_value),
-                                                comment=pkg.title or "")
+                                                comment=pkg.title or None)
                     elif obj.is_destination:
                         mispEvent.add_attribute('ip-dst', six.text_type(obj.address_value),
-                                                comment=pkg.title or "")
+                                                comment=pkg.title or None)
                     else:
                         # Don't have anything to go on
                         mispEvent.add_attribute('ip-dst', six.text_type(obj.address_value),
-                                                comment=pkg.title or "")
+                                                comment=pkg.title or None)
                 elif type_ == domain_name_object.DomainName:
-                    mispEvent.add_attribute('domain', six.text_type(obj.value), comment=pkg.title or "")
+                    mispEvent.add_attribute('domain', six.text_type(obj.value), comment=pkg.title or None)
                 elif type_ == hostname_object.Hostname:
                     mispEvent.add_attribute('hostname', six.text_type(obj.hostname_value),
-                                            comment=pkg.title or "")
+                                            comment=pkg.title or None)
                 elif type_ == uri_object.URI:
                     mispEvent.add_attribute('url', six.text_type(obj.value),
-                                            comment=pkg.title or "")
+                                            comment=pkg.title or None)
                 elif type_ == file_object.File:
                     # This is a bit harder
-                    # TODO: This
-                    pass
+                    # NOTE: Work in progress, only getting hashes
+                    if obj.md5:
+                        mispEvent.add_attribute('md5', six.text_type(obj.md5), comment=pkg.title or None)
+                    if obj.sha1:
+                        mispEvent.add_attribute('sha1', six.text_type(obj.sha1), comment=pkg.title or None)
+                    if obj.sha256:
+                        mispEvent.add_attribute('sha256', six.text_type(obj.sha256), comment=pkg.title or None)
+
 
                 elif type_ == email_message_object.EmailMessage:
                     if obj.header:
                         # We have a header, can check for to/from etc etc
                         if obj.header.from_:
                             mispEvent.add_attribute('email-src', six.text_type(obj.header.from_.address_value),
-                                                    comment=pkg.title or "")
+                                                    comment=pkg.title or None)
                         if obj.header.to:
                             for mail in obj.header.to:
                                 mispEvent.add_attribute('email-dst', six.text_type(mail.address_value),
-                                                        comment=pkg.title or "")
+                                                        comment=pkg.title or None)
                         if obj.header.subject:
                             mispEvent.add_attribute('email-subject', six.text_type(obj.header.subject),
-                                                    comment=pkg.title or "")
+                                                    comment=pkg.title or None)
                     if obj.attachments:
                         # FIXME that's definitely broken, but I have no sample.
                         for att in obj.attachments:
                             mispEvent.add_attribute('email-attachment', att.value,
-                                                    comment=pkg.title or "")
+                                                    comment=pkg.title or None)
                 elif type_ == mutex_object.Mutex:
-                    mispEvent.add_attribute('mutex', obj.name, comment=pkg.title or "")
+                    mispEvent.add_attribute('mutex', six.text_type(obj.name), comment=pkg.title or None)
                 elif type_ == whois_object.WhoisEntry:
                     pass
                 elif type_ == win_registry_key_object.WinRegistryKey:
@@ -150,9 +156,9 @@ def buildAttribute(pkg, mispEvent):
                 elif type_ == http_session_object.HTTPSession:
                     pass
                 elif type_ == pipe_object.Pipe:
-                    mispEvent.add_attribute('named pipe', six.text_type(obj.name), comment=pkg.title or "")
+                    mispEvent.add_attribute('named pipe', six.text_type(obj.name), comment=pkg.title or None)
                 elif type_ == as_object.AS:
-                    mispEvent.add_attribute('AS', six.text_type(obj.number), comment=pkg.title or six.text_type(obj.name) or "")
+                    mispEvent.add_attribute('AS', six.text_type(obj.number), comment=pkg.title or six.text_type(obj.name) or None)
                 else:
                     log.debug("Type not syncing {}".format(type_))
             else:
