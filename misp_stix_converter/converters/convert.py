@@ -121,8 +121,6 @@ def STIXtoMISP(stix, mispAPI, **kwargs):
     if misp_event.attributes:
         response = mispAPI.add_event(json.dumps(misp_event, cls=mispevent.EncodeUpdate))
         if response.get('errors'):
-            # FIXME *maybe* we want to raise a thing there....
-            pass
-            # raise Exception(response.get('errors'))
+            raise Exception(response.get('errors'))
 
         return response
