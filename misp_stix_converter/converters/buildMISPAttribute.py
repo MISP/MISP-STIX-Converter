@@ -17,7 +17,7 @@ from cybox.objects import domain_name_object, hostname_object, uri_object
 from cybox.objects import mutex_object, whois_object
 from cybox.objects import as_object, http_session_object
 from cybox.objects import pipe_object, network_packet_object, win_registry_key_object
-
+from cybox.objects import x509_certificate_object, win_executable_file_object, win_process_object
 
 # Just a little containment file for STIX -> MISP conversion
 ipre = re.compile("([0-9]{1,3}.){3}[0-9]{1,3}")
@@ -105,9 +105,16 @@ def buildAttribute(pkg, mispEvent):
                         mispEvent.add_attribute('ip-dst', six.text_type(obj.address_value),
                                                 comment=pkg.title or None)
                     else:
-                        # Don't have anything to go on
-                        mispEvent.add_attribute('ip-dst', six.text_type(obj.address_value),
-                                                comment=pkg.title or None)
+                        # We don't know, first check if it's an IP range
+                        if hasattr(obj, "condition"):
+                            if obj.condition == "InclusiveBetween":
+                                # Ok, so it's a range. hm. Shall we add them seperately#comma#or together?
+                                mispEvent.add_attribute('ip-dst', six.text_type(obj.address_value[0]))
+                                mispEvent.add_attribute('ip-dst', six.text_type(obj.add_attribute[1]))
+                        else:
+                            # Don't have anything to go on
+                            mispEvent.add_attribute('ip-dst', six.text_type(obj.address_value),
+                                                    comment=pkg.title or None)
                 elif type_ == domain_name_object.DomainName:
                     mispEvent.add_attribute('domain', six.text_type(obj.value), comment=pkg.title or None)
                 elif type_ == hostname_object.Hostname:
@@ -120,11 +127,16 @@ def buildAttribute(pkg, mispEvent):
                     # This is a bit harder
                     # NOTE: Work in progress, only getting hashes
                     if obj.md5:
-                        mispEvent.add_attribute('md5', six.text_type(obj.md5), comment=pkg.title or None)
+                        # We actually have to check the length
+                        # An actual report had supposed md5s of length 31. Silly.
+                        if len(obj.md5) == 32:
+                            mispEvent.add_attribute('md5', six.text_type(obj.md5), comment=pkg.title or None)
                     if obj.sha1:
-                        mispEvent.add_attribute('sha1', six.text_type(obj.sha1), comment=pkg.title or None)
+                        if len(obj.sha1) == 40:
+                            mispEvent.add_attribute('sha1', six.text_type(obj.sha1), comment=pkg.title or None)
                     if obj.sha256:
-                        mispEvent.add_attribute('sha256', six.text_type(obj.sha256), comment=pkg.title or None)
+                        if len(obj.sha256) == 64:
+                            mispEvent.add_attribute('sha256', six.text_type(obj.sha256), comment=pkg.title or None)
 
 
                 elif type_ == email_message_object.EmailMessage:
@@ -158,7 +170,14 @@ def buildAttribute(pkg, mispEvent):
                 elif type_ == pipe_object.Pipe:
                     mispEvent.add_attribute('named pipe', six.text_type(obj.name), comment=pkg.title or None)
                 elif type_ == as_object.AS:
-                    mispEvent.add_attribute('AS', six.text_type(obj.number), comment=pkg.title or six.text_type(obj.name) or None)
+                    mispEvent.add_attribute('AS', six.text_type(obj.number), 
+                                            comment=pkg.title or six.text_type(obj.name) or None)
+                elif type_ == win_executable_file_object.WinExecutableFile:
+                    pass
+                elif type_ == win_process_object.WinProcess:
+                    pass
+                elif type_ == x509_certificate_object.X509Certificate:
+                    pass
                 else:
                     log.debug("Type not syncing {}".format(type_))
             else:
