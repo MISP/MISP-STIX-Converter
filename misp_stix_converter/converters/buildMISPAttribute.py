@@ -106,7 +106,7 @@ def buildAttribute(pkg, mispEvent):
                                                 comment=pkg.title or None)
                     else:
                         # We don't know, first check if it's an IP range
-                        if hasattr(obj, "condition"):
+                        if hasattr(obj, "condition") and obj.condition:
                             if obj.condition == "InclusiveBetween":
                                 # Ok, so it's a range. hm. Shall we add them seperately#comma#or together?
                                 mispEvent.add_attribute('ip-dst', six.text_type(obj.address_value[0]))
@@ -170,7 +170,7 @@ def buildAttribute(pkg, mispEvent):
                 elif type_ == pipe_object.Pipe:
                     mispEvent.add_attribute('named pipe', six.text_type(obj.name), comment=pkg.title or None)
                 elif type_ == as_object.AS:
-                    mispEvent.add_attribute('AS', six.text_type(obj.number), 
+                    mispEvent.add_attribute('AS', six.text_type(obj.number),
                                             comment=pkg.title or six.text_type(obj.name) or None)
                 elif type_ == win_executable_file_object.WinExecutableFile:
                     pass
