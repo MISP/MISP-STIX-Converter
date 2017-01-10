@@ -9,7 +9,7 @@ from pymisp.tools.stix import make_stix_package
 def test_convert():
     # This is a public MISP instance.
     # Just running on AWS, nothing particularly interesting.
-    mispAPI = misp.MISP("http://ec2-35-167-39-27.us-west-2.compute.amazonaws.com", "3CxBMj5gNCxsvfrU31Zn8SCS0OJXAhD2Af5YUj5x")
+    mispAPI = misp.MISP("http://ec2-35-167-39-27.us-west-2.compute.amazonaws.com", "t2Q5tSiUz02lCK06oUS0ajy6QL1gBSldPpgKctwO")
     test_files = glob.glob("test_files/*.xml")
     for test_file in test_files:
         with open(test_file, "r") as f:
