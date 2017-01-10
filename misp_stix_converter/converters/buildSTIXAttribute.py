@@ -151,7 +151,7 @@ def buildAttribute(attr, pkg, ind):
         # Would be nice if we could structure it
         # so that it went Camp -> Obs, but sadly
         # we can't rely on a campaign existing.
-        camp = stix.common.Campaign(title=value)
+        camp = stix.core.Campaign(title=value)
         pkg.add_campaign(camp)
 
     elif type_ == "link":
