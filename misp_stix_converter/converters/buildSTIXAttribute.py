@@ -142,7 +142,7 @@ def buildAttribute(attr, pkg, ind):
         # we can still add them as a thing.
         ta = stix.core.ThreatActor()
         ta.title = value
-        if "comment" in attr:
+        if attr.comment:
             ta.description = attr.comment
         pkg.add_threat_actor(ta)
 
