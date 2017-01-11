@@ -140,7 +140,7 @@ def buildAttribute(attr, pkg, ind):
     elif type_ == "threat-actor":
         # Threat Actors. Whilst we don't have proper attribution,
         # we can still add them as a thing.
-        ta = stix.common.ThreatActor()
+        ta = stix.core.ThreatActor()
         ta.title = value
         if "comment" in attr:
             ta.description = attr.comment
