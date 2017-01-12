@@ -8,7 +8,7 @@ import os
 setup(
     name="misp_stix_converter",
     description="A tool to convert between STIX and MISP format",
-    version="0.2.7",
+    version="0.2.8",
     author="Hannah Ward",
     author_email="hannah.ward@baesystems.com",
     url="https://github.com/FloatingGhost/MISP-STIX-Converter",
