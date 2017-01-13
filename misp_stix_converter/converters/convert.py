@@ -106,18 +106,31 @@ def load_stix(stix):
 
 
 def STIXtoMISP(stix, mispAPI, **kwargs):
-    """
-        Function to convert from something stixxy ( as we have 3 possible representations )
-        to something mispy. Specifically JSON. Because XML is satan.
+    """Function to convert from something stixxy ( as we have 3 possible representations )
+    to something mispy. Specifically JSON. Because XML is satan.
 
-        :param stix: Something stixxy.
+    :param stix: Something stixxy.
     """
 
     log.info("Converting a package from STIX to MISP...")
-    stix = load_stix(stix)
+    stixPackage = load_stix(stix)
     # Ok by now we should have a proper STIX object.
 
-    misp_event = buildMISPAttribute.buildEvent(stix, **kwargs)
+    # We'll try to extract a filename
+    filename = "STIX File"
+    if isinstance(stix, str) and "\n" not in stix:
+        # It's probably just a filename
+        filename = stix
+    elif hasattr(stix, "name"):
+        # Steal this one!
+        filename = stix.name
+    elif hasattr(stixPackage, "stix_header"):
+        # Well it has a header, maybe we can steal it
+        if stixPackage.stix_header != "":
+            filename = stixPackage.stix_header
+
+    misp_event = buildMISPAttribute.buildEvent(stixPackage, **kwargs)
+    mispAPI.add_attachment(misp_event, filename, stixPackage.to_json())
     if misp_event.attributes:
         response = mispAPI.add_event(json.dumps(misp_event, cls=mispevent.EncodeUpdate))
         if response.get('errors'):
