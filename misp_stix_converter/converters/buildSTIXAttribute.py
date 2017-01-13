@@ -95,7 +95,7 @@ def buildAttribute(attr, pkg, ind):
         elif type_ == "sha256":
             f.sha256 = value
         elif type_ == "sha512":
-            f.sha512 == value
+            f.sha512 = value
         obs = stix.indicator.Observable(f)
         obs.title = attr.comment or "Hash (Simple)"
         ind.add_observable(f)
@@ -282,7 +282,7 @@ def buildAttribute(attr, pkg, ind):
     elif type_ == "domain|ip":
         # Oooh we've got both!
         # We'll add them in turn
-        dom, sep, ip = value.partition("|")
+        dom, _, ip = value.partition("|")
 
         # Add the IP
         addr = address_object.Address(address_value=ip)
@@ -399,4 +399,4 @@ def buildAttribute(attr, pkg, ind):
         if type_ not in ["campaign-id", "comment", "text",
                          "malware-sample", "pattern-in-file",
                          "other"]:
-            log.debug("Not adding {}".format(type_))
+            log.debug("Not adding %s" % type_)

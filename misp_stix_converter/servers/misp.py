@@ -19,7 +19,7 @@ __author__ = "Hannah Ward"
 log = logging.getLogger("__main__")
 
 
-class MISP:
+class MISP(object):
     """
       Wrapper to MISP API -- allows easy exporting and
       importing of STIX data

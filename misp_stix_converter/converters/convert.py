@@ -5,7 +5,7 @@
 # Imports
 # Sys imports
 import logging
-from tempfile import SpooledTemporaryFile, NamedTemporaryFile
+from tempfile import SpooledTemporaryFile
 import json
 import base64
 
@@ -73,7 +73,7 @@ def load_stix(stix):
         try:
             # Try loading from JSON
             stix_package = STIXPackage.from_json(stix)
-        except:
+        except json.JSONDecodeError:
             # Ok then try loading from XML
             # Loop zoop
             stix.seek(0)
