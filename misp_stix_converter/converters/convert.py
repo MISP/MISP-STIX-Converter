@@ -7,6 +7,7 @@
 import logging
 from tempfile import SpooledTemporaryFile, NamedTemporaryFile
 import json
+import base64
 
 from pymisp import mispevent
 
@@ -117,7 +118,7 @@ def STIXtoMISP(stix, mispAPI, **kwargs):
     # Ok by now we should have a proper STIX object.
 
     # We'll try to extract a filename
-    filename = "STIX File"
+    filename = "STIX_File.xml"
     if isinstance(stix, str) and "\n" not in stix:
         # It's probably just a filename
         filename = stix
@@ -126,11 +127,12 @@ def STIXtoMISP(stix, mispAPI, **kwargs):
         filename = stix.name
     elif hasattr(stixPackage, "stix_header"):
         # Well it has a header, maybe we can steal it
-        if stixPackage.stix_header != "":
-            filename = stixPackage.stix_header
-
+        if stixPackage.stix_header:
+            if stixPackage.stix_header.title not in  ["", None]:
+                filename = stixPackage.stix_header.title + ".xml"
     misp_event = buildMISPAttribute.buildEvent(stixPackage, **kwargs)
-    mispAPI.add_attachment(misp_event, filename, stixPackage.to_json())
+    b64Pkg = base64.b64encode(stixPackage.to_xml()).decode("utf-8")
+    misp_event.add_attribute(type="attachment", value=filename, data=b64Pkg)
     if misp_event.attributes:
         response = mispAPI.add_event(json.dumps(misp_event, cls=mispevent.EncodeUpdate))
         if response.get('errors'):
