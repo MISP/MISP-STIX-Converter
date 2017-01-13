@@ -15,12 +15,3 @@ def test_convert():
         with open(test_file, "r") as f:
             misppkg = convert.STIXtoMISP(f.read(), mispAPI.mispAPI)
 
-        # Convert it back for the hell of it. Gib coverage
-        try:
-            event = pymisp.MISPEvent()
-            event.load(misppkg)
-            convert.MISPtoSTIX(event)
-        except Exception as ex:
-            # This is kinda expected for some reason
-            if not "'NoneType' object has no attribute 'get'" in str(ex):
-                raise Exception("Failed on {} :: {}".format(test_file, ex))
