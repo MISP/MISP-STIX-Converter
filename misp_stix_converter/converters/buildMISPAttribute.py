@@ -48,10 +48,10 @@ def open_stix(stix_thing):
     pkg = None
     try:
         pkg = STIXPackage().from_xml(stix_thing)
-    except:
+    except Exception:
         try:
             pkg = STIXPackage.from_json(stix_thing)
-        except:
+        except Exception:
             raise Exception("Could not load package!")
     return pkg
 
@@ -179,7 +179,7 @@ def buildAttribute(pkg, mispEvent):
                 elif type_ == x509_certificate_object.X509Certificate:
                     pass
                 else:
-                    log.debug("Type not syncing {}".format(type_))
+                    log.debug("Type not syncing %s", type_)
             else:
                 pass
         else:

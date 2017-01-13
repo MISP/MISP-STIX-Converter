@@ -24,22 +24,21 @@ log = logging.getLogger("__main__")
 
 
 def buildAttribute(attr, pkg, ind):
-    """
-      Given a MISP attribute, create a stix
-      attribute, add it to an indicator for
-      easy lookings up.
+    """Given a MISP attribute, create a stix
+    attribute, add it to an indicator for
+    easy lookings up.
 
-      There are quite a few assumptions here,
-      including that there should only be one
-      threat-actor per MISP event in order to
-      give proper attribution.
+    There are quite a few assumptions here,
+    including that there should only be one
+    threat-actor per MISP event in order to
+    give proper attribution.
 
-      :param attr: The misp JSON attribute to parse and build from
-      :param pkg : The STIX package to push the created object to
-      :param ind : The STIX indicator to push observables to
+    :param attr: The misp JSON attribute to parse and build from
+    :param pkg : The STIX package to push the created object to
+    :param ind : The STIX indicator to push observables to
    """
 
-    # Extract
+    # Extract type and value from the attribute
     type_ = attr.type
     value = attr.value
 
@@ -78,7 +77,7 @@ def buildAttribute(attr, pkg, ind):
         ind.add_observable(obs)
 
     elif type_ in ["url", "uri"]:
-        # UR(i|l). I guess we'll use a URI object (as URLs ⊆ URIs).
+        # UR(i|l). I guess we'll use a URI object (as URLs are a subset of URIs).
         url = uri_object.URI(value)
         obs = stix.indicator.Observable(url)
         obs.title = attr.comment or "URI"
@@ -111,7 +110,7 @@ def buildAttribute(attr, pkg, ind):
     elif type_ in ["filename|md5", "filename|sha1", "filename|sha256", "filename|sha512"]:
         # A filename AND a hash! Aren't we lucky!
         # Add the Hash to a File object.
-        fname, sep, hsh = value.partition("|")
+        fname, _, hsh = value.partition("|")
         f = file_object.File()
         if "md5" in type_:
             f.md5 = hsh
@@ -399,4 +398,4 @@ def buildAttribute(attr, pkg, ind):
         if type_ not in ["campaign-id", "comment", "text",
                          "malware-sample", "pattern-in-file",
                          "other"]:
-            log.debug("Not adding %s" % type_)
+            log.debug("Not adding %s", type_)

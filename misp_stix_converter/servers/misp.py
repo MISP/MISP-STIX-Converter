@@ -34,7 +34,7 @@ class MISP(object):
           :param verify: Shall we verify SSL? Can be bool or location of a signature
         """
         log.debug("Starting MISP")
-        log.debug("{} -- {}".format(url, key))
+        log.debug("%s -- %s", url, key)
         self.url = url
         self.key = key
         self.verify = verify
@@ -52,10 +52,10 @@ class MISP(object):
         """
 
         log.debug("MISP PULL")
-        log.debug("IDS:  {}".format(id_))
-        log.debug("TAGS: {}".format(tags))
-        log.debug("FROM: {}".format(from_))
-        log.debug("TO:   {}".format(to))
+        log.debug("IDS:  %s", id_)
+        log.debug("TAGS: %s", tags)
+        log.debug("FROM: %s", from_)
+        log.debug("TO:   %s", to)
 
         # Attempt to request the data
         try:
