@@ -13,7 +13,7 @@ setup(
     author_email="hannah.ward@baesystems.com",
     url="https://github.com/FloatingGhost/MISP-STIX-Converter",
     packages=['misp_stix_converter', "misp_stix_converter.servers", "misp_stix_converter.converters"],
-    install_requires=["pymisp", "requests>=2.9.1", "pyaml>=3.11",
+    install_requires=["pymisp>=2.4.56", "requests>=2.9.1", "pyaml>=3.11",
                       "stix>=1.2", "cybox>=2.0", "nose", "cabby"],
     dependency_links=["git+https://github.com/MISP/PyMISP#egg=pymisp",
                       "git+https://github.com/STIXProject/python-stix.git",
