@@ -3,6 +3,7 @@
 
 [![Coverage Status](https://coveralls.io/repos/github/MISP/MISP-STIX-Converter/badge.svg?branch=master)](https://coveralls.io/github/MISP/MISP-STIX-Converter?branch=master)
 [![Build Status](https://travis-ci.org/MISP/MISP-STIX-Converter.svg?branch=master)](https://travis-ci.org/MISP/MISP-STIX-Converter)
+[![Code Health](https://landscape.io/github/MISP/MISP-STIX-Converter/master/landscape.svg?style=flat)](https://landscape.io/github/MISP/MISP-STIX-Converter/master)
 
 This is the open-sourced version of BAE Systems' internal
 sync script. It's a bit limited, and it isn't perfect, nor is it bug-free.
