@@ -5,7 +5,7 @@ python:
     - "nightly"
 before_install:
     - "git clone https://github.com/MISP/PyMISP.git"
-    - "cd PyMISP && python setup.py install & cd .."
+    - "cd PyMISP && python setup.py install && cd .."
     - "pip install coveralls"
     - "pip install coverage"
 install: 
