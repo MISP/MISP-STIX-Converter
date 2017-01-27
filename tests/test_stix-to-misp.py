@@ -2,9 +2,6 @@
 import glob
 from misp_stix_converter.converters import convert
 from misp_stix_converter.servers import misp
-import os
-import pymisp
-from pymisp.tools.stix import make_stix_package
 
 def test_convert():
     # This is a public MISP instance.
@@ -13,5 +10,5 @@ def test_convert():
     test_files = glob.glob("test_files/*.xml")
     for test_file in test_files:
         with open(test_file, "r") as f:
-            misppkg = convert.STIXtoMISP(f.read(), mispAPI.mispAPI)
+            convert.STIXtoMISP(f.read(), mispAPI.mispAPI)
 

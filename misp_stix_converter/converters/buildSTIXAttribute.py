@@ -322,7 +322,7 @@ def buildAttribute(attr, pkg, ind):
     elif type_ == "regkey|value":
         # A windows registry key and a value
         # Split them and add seperately
-        regkey, sep, value = value.partition("|")
+        regkey, _, value = value.partition("|")
         regentry = win_registry_key_object.WinRegistryKey()
         val = win_registry_key_object.RegistryValue()
         val.name = regkey
@@ -335,7 +335,7 @@ def buildAttribute(attr, pkg, ind):
 
     elif type_ == "regkey":
         # Just a reg key without a value.
-        regkey, sep, value = value.partition("|")
+        regkey, _, value = value.partition("|")
         regentry = win_registry_key_object.WinRegistryKey()
         val = win_registry_key_object.RegistryValue()
         val.name = regkey

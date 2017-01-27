@@ -79,11 +79,11 @@ class MISP(object):
             log.error("Server error - no data recieved")
         log.info("Response recieved, MISP pull complete.")
 
-        log.info("{} packages recieved".format(len(recent["response"])))
+        log.info("%s packages recieved", len(recent["response"]))
         packages = [convert.MISPtoSTIX(self.mispAPI.get(x["id"])) for x in recent["response"]]
         return packages
 
-    def push(self, data, dryrun=False, **kwargs):
+    def push(self, data, **kwargs):
         """
           Push a package to the MISP instance
 
