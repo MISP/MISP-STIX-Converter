@@ -64,7 +64,7 @@ class MISP(object):
             recent = self.mispAPI.search_index(eventid=id_,
                                                tag=tags,
                                                datefrom=from_,
-                                               dateto=to,
+                                               dateuntil=to,
                                                )
 
         except requests.exceptions.HTTPError as ex:
