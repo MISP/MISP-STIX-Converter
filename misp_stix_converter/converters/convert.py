@@ -42,7 +42,12 @@ def MISPtoSTIX(mispJSON):
 
     # Create a base stix
     stix = STIXPackage()
-    stix.MISPID = mispJSON["Event"]["id"]
+    try:
+        stix.MISPID = mispJSON["Event"]["id"]
+    except:
+        # We don't have an ID?
+        # Generate a random number and use that
+        stix.MISPID = random.randint(1,9000)
 
     # Create a header for the new stix
     stix.stix_header = STIXHeader()

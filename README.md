@@ -17,7 +17,7 @@ If you don't wanna use git,
 sudo pip3 install misp_stix_converter
 ```
 should have you covered. This relies on me actually updating PyPI every time I update the project, so I'd use the 
-git repo wherever possible/
+git repo wherever possible.
 
 ```
 sudo python3 setup.py install
@@ -54,7 +54,13 @@ So to convert a MISP JSON file to stix json, use
 
 And to pull a specific event from the MISP instance
 
-`./misp-to-stix.py -i EVENT_ID...`
+`misp-to-stix.py -i EVENT_ID...`
+
+Alternatively, if you want to pull every event of a certain tag, you can run
+
+`misp-to-stix.py -t tlp:white -o out.{}.xml`
+
+Which will write all "tlp:white" tagged events to a file formatted by the event's ID, e.g out.29.xml
 
 ###For STIX to MISP
 
