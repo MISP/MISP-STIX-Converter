@@ -18,11 +18,14 @@ from misp_stix_converter.converters import convert
 from misp_stix_converter.converters import lint_roller
 
 parser = argparse.ArgumentParser(description='Process some integers.')
-parser.add_argument('-o', '--outfile', help="The file to output to. Default is stdout. ")
+inputg  = parser.add_mutually_exclusive_group(required=True)
+
+inputg.add_argument("-f", "--file", help="The MISP JSON file to convert")
+inputg.add_argument("-i", "--eid", help="The MISP event ID to pull and convert")
+inputg.add_argument("-t", "--tag", help="Download all of a single tag")
+
+parser.add_argument('-o', '--outfile', help="The file to output to. Default is stdout.", default="stdout")
 parser.add_argument("-c", "--config", help="Path to config file. Default is misp.login.")
-parser.add_argument("-f", "--file", help="The MISP JSON file to convert")
-parser.add_argument("-i", "--eid", help="The MISP event ID to pull and convert")
-parser.add_argument("-t", "--tag", help="Download all of a single tag")
 parser.add_argument("-v", "--verbose", help="More output", default="1.2")
 parser.add_argument("-l", "--logfile", help="Where to send the log to", default="converter.log")
 parser.add_argument("--format", help="The output format [JSON/XML]. Default JSON.")
@@ -54,18 +57,6 @@ try:
 except FileNotFoundError:
     print("Could not find config file {}".format(configfile))
     sys.exit(1)
-
-# We either need a file or an event ID
-if not (args.file or args.eid or args.tag):
-    print("We need something to convert!")
-    print("Please either specify a file with -f [FILENAME]")
-    print("Or a MISP ID with -i [ID]")
-    sys.exit()
-
-if (args.file and args.eid) or (args.file and args.tag) or (args.eid and args.tag):
-    print("We can't convert both at once!")
-    print("*EITHER* provide -i, -f or -t. Only one.")
-    sys.exit()
 
 if args.tag and not ("{}" in args.outfile):
     args.outfile += ".{}"
@@ -129,7 +120,7 @@ def write_pkg(pkg, outfile):
     if args.format == "json":
         log.debug("In JSON format")
         # Output to JSON
-        if not outfile:
+        if outfile == "stdout":
             # Output to stdout
             print(pkg.to_json())
         else:
@@ -139,7 +130,7 @@ def write_pkg(pkg, outfile):
     else:
         log.debug("In XML format")
         # Output to XML
-        if not outfile:
+        if outfile == "stdout":
             # Output to stdout
             print(pkg.to_xml())
         else:
