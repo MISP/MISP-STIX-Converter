@@ -16,7 +16,7 @@ from misp_stix_converter.converters import convert
 
 __author__ = "Hannah Ward"
 
-log = logging.getLogger("__main__")
+log = logging.getLogger(__name__)
 
 
 class MISP(object):

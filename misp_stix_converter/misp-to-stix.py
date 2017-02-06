@@ -11,26 +11,43 @@ import argparse
 import pyaml
 import sys
 import os
+import logging
 
 from misp_stix_converter.servers import misp
 from misp_stix_converter.converters import convert
 from misp_stix_converter.converters import lint_roller
 
 parser = argparse.ArgumentParser(description='Process some integers.')
-parser.add_argument('-o', '--outfile', help="The file to output to. Default is stdout")
+parser.add_argument('-o', '--outfile', help="The file to output to. Default is stdout. ")
+parser.add_argument("-d", "--outdir", help="Directory to output to")
 parser.add_argument("-c", "--config", help="Path to config file. Default is misp.login.")
 parser.add_argument("-f", "--file", help="The MISP JSON file to convert")
 parser.add_argument("-i", "--eid", help="The MISP event ID to pull and convert")
+parser.add_argument("-t", "--tag", help="Download all of a single tag")
+parser.add_argument("-v", "--verbose", help="More output", default="1.2")
+parser.add_argument("-l", "--logfile", help="Where to send the log to", default="converter.log")
 parser.add_argument("--format", help="The output format [JSON/XML]. Default JSON.")
 parser.add_argument("--stix-version", help="Set the STIX output version. Default 1.2.")
 
 args = parser.parse_args()
+
+log = logging.getLogger(__name__)
+handler = logging.FileHandler(args.logfile)
+formatter =  logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+
+handler.setFormatter(formatter)
+log.addHandler(handler)
+log.setLevel(logging.INFO if args.verbose else logging.DEBUG)
+
+log.info("MISP<->STIX Converter")
 
 # Set the config file
 if args.config:
     configfile = args.config
 else:
     configfile = os.path.expanduser("~/.misptostix/misp.login")
+
+log.debug("Using config file at %s", configfile)
 
 try:
     with open(configfile, "r") as f:
@@ -40,15 +57,15 @@ except FileNotFoundError:
     sys.exit(1)
 
 # We either need a file or an event ID
-if not (args.file or args.eid):
+if not (args.file or args.eid or args.tag):
     print("We need something to convert!")
     print("Please either specify a file with -f [FILENAME]")
     print("Or a MISP ID with -i [ID]")
     sys.exit()
 
-if (args.file and args.eid):
+if (args.file and args.eid) or (args.file and args.tag) or (args.eid and args.tag):
     print("We can't convert both at once!")
-    print("*EITHER* provide -i or -f. Not both.")
+    print("*EITHER* provide -i, -f or -t. Only one.")
     sys.exit()
 
 if args.format:
@@ -61,6 +78,9 @@ else:
     args.format = "json"
 
 if (args.file):
+
+    log.debug("Converting file at %s", args.file)
+
     # This is just a file conversion
     # Relatively quick and easy
     # Create a non-connected misp instance
@@ -77,39 +97,58 @@ else:
     # As we need to pull an event
     # Connect to MISP
     MISP = misp.MISP(CONFIG["MISP"]["URL"], CONFIG["MISP"]["KEY"])
-    package = MISP.pull(args.eid)[0]
 
-
-# Set the version
-if args.stix_version:
-    if args.stix_version == "1.1.1":
-        objs = lint_roller.lintRoll(package)
-        for i in objs:
-            # Set the object's version
-            if hasattr(i, "version"):
-                i.version = args.stix_version
-
-    elif args.stix_version == "1.2":
-        pass  # Is default
+    if args.tag:
+        log.debug("Converting all events tagged with %s", args.tag)
+        package = MISP.pull(tags=[args.tag])
     else:
-        print("INVALID STIX VERSION {}".format(args.stix_version))
-        sys.exit()
+        log.debug("Converting event %s", args.eid)
+        package = MISP.pull(args.eid)[0]
 
-if args.format == "json":
-    # Output to JSON
-    if not args.outfile:
-        # Output to stdout
-        print(package.to_json())
+def write_pkg(pkg, outfile):
+    # Set the version
+    log.debug("Writing to %s", outfile)
+    log.debug("As stix v%s", args.stix_version)
+    
+    if args.stix_version:
+        if args.stix_version == "1.1.1":
+            objs = lint_roller.lintRoll(pkg)
+            for i in objs:
+                # Set the object's version
+                if hasattr(i, "version"):
+                    i.version = args.stix_version
+
+        elif args.stix_version == "1.2":
+            pass  # Is default
+        else:
+            print("INVALID STIX VERSION {}".format(args.stix_version))
+            sys.exit()
+
+    if args.format == "json":
+        log.debug("In JSON format")
+        # Output to JSON
+        if not outfile:
+            # Output to stdout
+            print(pkg.to_json())
+        else:
+            # Output to file
+            with open(outfile, "w") as f:
+                f.write(pkg.to_json())
     else:
-        # Output to file
-        with open(args.outfile, "w") as f:
-            f.write(package.to_json())
+        log.debug("In XML format")
+        # Output to XML
+        if not outfile:
+            # Output to stdout
+            print(pkg.to_xml())
+        else:
+            # Output to file
+            with open(outfile, "wb") as f:
+                f.write(pkg.to_xml())
+
+    log.debug("Written!")
+
+if not args.tag:
+    write_pkg(package, args.outfile)
 else:
-    # Output to XML
-    if not args.outfile:
-        # Output to stdout
-        print(package.to_xml())
-    else:
-        # Output to file
-        with open(args.outfile, "wb") as f:
-            f.write(package.to_xml())
+    for p in package:
+        write_pkg(p, args.outfile.format(p.MISPID))    

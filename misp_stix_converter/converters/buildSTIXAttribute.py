@@ -309,7 +309,7 @@ def buildAttribute(attr, pkg, ind):
         # Some snort rule. Idk what Snort is or does,
         # but still, we'll take it.
         snort = snort_test_mechanism.SnortTestMechanism()
-        snort.add_rule(value)
+        snort.rules.append(value)
         ind.test_mechanisms.append(snort)
 
     elif type_ == "yara":

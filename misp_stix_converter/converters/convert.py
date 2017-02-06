@@ -42,6 +42,7 @@ def MISPtoSTIX(mispJSON):
 
     # Create a base stix
     stix = STIXPackage()
+    stix.MISPID = mispJSON["Event"]["id"]
 
     # Create a header for the new stix
     stix.stix_header = STIXHeader()
