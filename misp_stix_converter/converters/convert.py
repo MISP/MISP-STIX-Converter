@@ -8,6 +8,7 @@ import logging
 from tempfile import SpooledTemporaryFile
 import json
 import base64
+import random
 
 from pymisp import mispevent
 
