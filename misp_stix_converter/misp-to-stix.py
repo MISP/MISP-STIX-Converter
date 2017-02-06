@@ -19,7 +19,6 @@ from misp_stix_converter.converters import lint_roller
 
 parser = argparse.ArgumentParser(description='Process some integers.')
 parser.add_argument('-o', '--outfile', help="The file to output to. Default is stdout. ")
-parser.add_argument("-d", "--outdir", help="Directory to output to")
 parser.add_argument("-c", "--config", help="Path to config file. Default is misp.login.")
 parser.add_argument("-f", "--file", help="The MISP JSON file to convert")
 parser.add_argument("-i", "--eid", help="The MISP event ID to pull and convert")
@@ -67,6 +66,9 @@ if (args.file and args.eid) or (args.file and args.tag) or (args.eid and args.ta
     print("We can't convert both at once!")
     print("*EITHER* provide -i, -f or -t. Only one.")
     sys.exit()
+
+if args.tag and not ("{}" in args.outfile):
+    args.outfile += ".{}"
 
 if args.format:
     args.format = args.format.lower()
