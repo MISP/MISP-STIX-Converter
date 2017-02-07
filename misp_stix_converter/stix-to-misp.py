@@ -43,7 +43,7 @@ if "SSL" not in CONFIG["MISP"]:
 
 # This is just a file conversion
 # Relatively quick and easy
-MISP = misp.MISP(CONFIG["MISP"]["URL"], CONFIG["MISP"]["KEY"], CONFIG["MISP"]["SSL"])
+MISP = misp.MISP(CONFIG["MISP"]["URL"], CONFIG["MISP"]["KEY"], CONFIG["MISP"].get("SSL", True))
 
 # Load the package
 pkg = open_stix(args.file)
