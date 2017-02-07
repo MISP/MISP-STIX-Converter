@@ -9,6 +9,7 @@
 
 import argparse
 import pyaml
+import time
 import sys
 import os
 import logging
@@ -18,7 +19,7 @@ from misp_stix_converter.converters import convert
 from misp_stix_converter.converters import lint_roller
 
 parser = argparse.ArgumentParser(description='Process some integers.')
-inputg  = parser.add_mutually_exclusive_group(required=True)
+inputg = parser.add_mutually_exclusive_group(required=True)
 
 inputg.add_argument("-f", "--file", help="The MISP JSON file to convert")
 inputg.add_argument("-i", "--eid", help="The MISP event ID to pull and convert")
@@ -35,7 +36,7 @@ args = parser.parse_args()
 
 log = logging.getLogger(__name__)
 handler = logging.FileHandler(args.logfile)
-formatter =  logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
 
 handler.setFormatter(formatter)
 log.addHandler(handler)
@@ -86,10 +87,16 @@ if (args.file):
         sys.exit()
 
 else:
+    # Backwards compatability, if users haven't updated config
+    if "SSL" not in CONFIG["MISP"]:
+        print("Please update your config file using the misp.login.example to include SSL\n")
+        time.sleep(1)
+        CONFIG["MISP"]["SSL"] = False
+
     # This requires a connection to MISP
     # As we need to pull an event
     # Connect to MISP
-    MISP = misp.MISP(CONFIG["MISP"]["URL"], CONFIG["MISP"]["KEY"])
+    MISP = misp.MISP(CONFIG["MISP"]["URL"], CONFIG["MISP"]["KEY"], CONFIG["MISP"]["SSL"])
 
     if args.tag:
         log.debug("Converting all events tagged with %s", args.tag)
@@ -98,11 +105,12 @@ else:
         log.debug("Converting event %s", args.eid)
         package = MISP.pull(args.eid)[0]
 
+
 def write_pkg(pkg, outfile):
     # Set the version
     log.debug("Writing to %s", outfile)
     log.debug("As stix v%s", args.stix_version)
-    
+
     if args.stix_version:
         if args.stix_version == "1.1.1":
             objs = lint_roller.lintRoll(pkg)
@@ -144,4 +152,4 @@ if not args.tag:
     write_pkg(package, args.outfile)
 else:
     for p in package:
-        write_pkg(p, args.outfile.format(p.MISPID))    
+        write_pkg(p, args.outfile.format(p.MISPID))

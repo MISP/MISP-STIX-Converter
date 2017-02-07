@@ -9,6 +9,7 @@
 
 import argparse
 import pyaml
+import time
 import sys
 import os
 
@@ -34,9 +35,15 @@ except FileNotFoundError:
     print("Could not find config file {}".format(configfile))
     sys.exit(1)
 
+# Backwards compatability, if users haven't updated config
+if "SSL" not in CONFIG["MISP"]:
+    print("Please update your config file using the misp.login.example to include SSL")
+    time.sleep(1)
+    CONFIG["MISP"]["SSL"] = False
+
 # This is just a file conversion
 # Relatively quick and easy
-MISP = misp.MISP(CONFIG["MISP"]["URL"], CONFIG["MISP"]["KEY"])
+MISP = misp.MISP(CONFIG["MISP"]["URL"], CONFIG["MISP"]["KEY"], CONFIG["MISP"]["SSL"])
 
 # Load the package
 pkg = open_stix(args.file)
