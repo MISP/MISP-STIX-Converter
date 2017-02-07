@@ -96,7 +96,7 @@ else:
     # This requires a connection to MISP
     # As we need to pull an event
     # Connect to MISP
-    MISP = misp.MISP(CONFIG["MISP"]["URL"], CONFIG["MISP"]["KEY"], CONFIG["MISP"]["SSL"])
+    MISP = misp.MISP(CONFIG["MISP"]["URL"], CONFIG["MISP"]["KEY"], CONFIG["MISP"].get("SSL", True))
 
     if args.tag:
         log.debug("Converting all events tagged with %s", args.tag)
