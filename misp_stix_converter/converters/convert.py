@@ -48,7 +48,7 @@ def MISPtoSTIX(mispJSON):
     except:
         # We don't have an ID?
         # Generate a random number and use that
-        stix.MISPID = random.randint(1,9000)
+        stix.MISPID = random.randint(1, 9000)
 
     # Create a header for the new stix
     stix.stix_header = STIXHeader()
@@ -71,15 +71,21 @@ def load_stix(stix):
     # Just save the pain and load it if the first character is a <
 
     if isinstance(stix, STIXPackage):
-        # Oh cool we're ok 
+        # Oh cool we're ok
         # Who tried to load this? Honestly.
         return stix
 
     elif hasattr(stix, 'read'):
         # It's a file!
+        # But somehow, sometimes, reading it returns a bytes stream and the loader dies on python 3.4.
+        # Luckily, STIXPackage.from_json (which is mixbox.Entity.from_json) will happily load a string.
+        # So we're going to play dirty.
+        data = stix.read()
+        if isinstance(data, bytes):
+            data = data.decode()
         try:
             # Try loading from JSON
-            stix_package = STIXPackage.from_json(stix)
+            stix_package = STIXPackage.from_json(data)
         except (TypeError, json.JSONDecodeError):
             # Ok then try loading from XML
             # Loop zoop
@@ -93,13 +99,13 @@ def load_stix(stix):
         return stix_package
 
     elif isinstance(stix, str):
-        # It's text, we'll need to use a temporary file  
-        
+        # It's text, we'll need to use a temporary file
+
         # Create a temporary file to load from
         # Y'know I should probably give it a max size before jumping to disk
-        # idk, 10MB? Sounds reasonable. 
-        f = SpooledTemporaryFile(max_size=10*1024)
-        
+        # idk, 10MB? Sounds reasonable.
+        f = SpooledTemporaryFile(max_size=10 * 1024)
+
         # O I have idea for sneak
         # Will be very sneak
 
@@ -135,7 +141,7 @@ def STIXtoMISP(stix, mispAPI, **kwargs):
     elif hasattr(stixPackage, "stix_header"):
         # Well it has a header, maybe we can steal it
         if stixPackage.stix_header:
-            if stixPackage.stix_header.title not in  ["", None]:
+            if stixPackage.stix_header.title not in ["", None]:
                 filename = stixPackage.stix_header.title + ".xml"
     misp_event = buildMISPAttribute.buildEvent(stixPackage, **kwargs)
     b64Pkg = base64.b64encode(stixPackage.to_xml()).decode("utf-8")
@@ -143,7 +149,7 @@ def STIXtoMISP(stix, mispAPI, **kwargs):
     if misp_event.attributes:
         response = mispAPI.add_event(json.dumps(misp_event, cls=mispevent.EncodeUpdate))
         if response.get('errors'):
-            raise Exception("PACKAGE: {}\nERROR: {}".format(json.dumps(misp_event, cls=mispevent.EncodeUpdate), 
+            raise Exception("PACKAGE: {}\nERROR: {}".format(json.dumps(misp_event, cls=mispevent.EncodeUpdate),
                                                             response.get('errors')))
-            
+
         return response
