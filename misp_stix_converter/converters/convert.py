@@ -9,6 +9,7 @@ from tempfile import SpooledTemporaryFile
 import json
 import base64
 import random
+import sys
 
 from pymisp import mispevent
 
@@ -70,6 +71,11 @@ def MISPtoSTIX(mispJSON):
 def load_stix(stix):
     # Just save the pain and load it if the first character is a <
 
+    if sys.version_info < (3, 5):
+        json_exception = ValueError
+    else:
+        json_exception = json.JSONDecodeError
+
     if isinstance(stix, STIXPackage):
         # Oh cool we're ok
         # Who tried to load this? Honestly.
@@ -86,7 +92,7 @@ def load_stix(stix):
         try:
             # Try loading from JSON
             stix_package = STIXPackage.from_json(data)
-        except (TypeError, json.JSONDecodeError):
+        except json_exception:
             # Ok then try loading from XML
             # Loop zoop
             stix.seek(0)
