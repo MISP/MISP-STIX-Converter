@@ -111,6 +111,12 @@ def buildAttribute(pkg, mispEvent):
                                 # Ok, so it's a range. hm. Shall we add them seperately#comma#or together?
                                 mispEvent.add_attribute('ip-dst', six.text_type(obj.address_value[0]))
                                 mispEvent.add_attribute('ip-dst', six.text_type(obj.add_attribute[1]))
+                            elif obj.condition == "Equals":
+                                mispEvent.add_attribute('ip-dst', six.text_type(obj.address_value),
+                                                        comment=pkg.title or None)
+                            else:
+                                # Unknown condition
+                                pass
                         else:
                             # Don't have anything to go on
                             mispEvent.add_attribute('ip-dst', six.text_type(obj.address_value),
