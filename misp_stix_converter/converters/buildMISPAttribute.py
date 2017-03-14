@@ -150,7 +150,7 @@ def buildAttribute(pkg, mispEvent):
                     #Added by Davide Baglieri (aka davidonzo)
                     if obj.file_name:
                         mispEvent.add_attribute('filename', six.text_type(obj.file_name), comment=pkg.title or None)
-                    if obj.size_in_bytes
+                    if obj.size_in_bytes:
                         mispEvent.add_attribute('size-in-bytes', six.text_type(obj.size_in_bytes), comment=pkg.title or None)
                     #Added by Davide Baglieri (aka davidonzo)
                     
