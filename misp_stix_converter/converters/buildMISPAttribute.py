@@ -25,7 +25,7 @@ log = logging.getLogger("__main__")
 
 #Added by Davide Baglieri (aka davidonzo)
 def parseAttachment(obj, mispEvent):
-    for idx in range(len(obs)):
+    for idx in range(len(obj)):
 
         if obj[idx].properties.file_name:
             mispEvent.add_attribute('filename', six.text_type(obj[idx].properties.file_name), comment=pkg.title or None)
