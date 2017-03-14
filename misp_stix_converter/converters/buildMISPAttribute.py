@@ -34,15 +34,15 @@ def parseAttachment(obj, mispEvent, pkg):
             mispEvent.add_attribute('size-in-bytes', six.text_type(obj[idx].properties.size_in_bytes), comment=pkg.title or None)
  
         if obj[idx].md5:
-            if len(obj.properties.md5) == 32:
+            if len(obj[idx].properties.md5) == 32:
                 mispEvent.add_attribute('md5', six.text_type(obj[idx].properties.md5), comment=pkg.title or None)
     
         if obj[idx].sha1:
-            if len(obj.sha1) == 40:
+            if len(obj[idx].sha1) == 40:
                 mispEvent.add_attribute('sha1', six.text_type(obj[idx].sha1), comment=pkg.title or None)
 
         if obj[idx].sha256:
-            if len(obj.sha256) == 64:
+            if len(obj[idx].sha256) == 64:
                 mispEvent.add_attribute('sha256', six.text_type(obj[idx].sha256), comment=pkg.title or None)
 
     return mispEvent
