@@ -23,7 +23,7 @@ from cybox.objects import x509_certificate_object, win_executable_file_object, w
 ipre = re.compile("([0-9]{1,3}.){3}[0-9]{1,3}")
 log = logging.getLogger("__main__")
 
-def parseAttachment(obs)
+def parseAttachment(obs):
     for idx in range(len(obs)):
         if hasattr(obs[idx].properties, 'file_name'):
 	    if obs[idx].properties.file_name:
