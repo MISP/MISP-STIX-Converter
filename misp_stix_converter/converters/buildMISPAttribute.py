@@ -158,7 +158,7 @@ def buildAttribute(pkg, mispEvent):
                         if len(obj.sha256) == 64:
                             mispEvent.add_attribute('sha256', six.text_type(obj.sha256), comment=pkg.title or None)
                     #Added by Davide Baglieri (aka davidonzo)
-                    if obj.file_name
+                    if obj.file_name:
                         mispEvent.add_attribute('filename', six.text_type(obj.file_name), comment=pkg.title or None)
 
 
