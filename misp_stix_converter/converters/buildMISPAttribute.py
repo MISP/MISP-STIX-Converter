@@ -209,4 +209,4 @@ def buildAttribute(pkg, mispEvent):
             pass  # Other objects. TODO.
     except Exception as ex:
         log.error(ex)
-return mispEvent
+	return mispEvent
