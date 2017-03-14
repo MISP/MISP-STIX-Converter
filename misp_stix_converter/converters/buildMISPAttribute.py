@@ -194,6 +194,8 @@ def buildAttribute(pkg, mispEvent):
                     if obj.attachments:
                         # FIXME that's definitely broken, but I have no sample.
                         #for att in obj.attachments:
+						
+						#OK. Fixed! Please, review the changes :-)
                         if pkg.object_.related_objects:
                             parseAttachment(pkg.object_.related_objects, mispEvent, pkg)
                                 
