@@ -24,7 +24,7 @@ ipre = re.compile("([0-9]{1,3}.){3}[0-9]{1,3}")
 log = logging.getLogger("__main__")
 
 #Added by Davide Baglieri (aka davidonzo)
-def parseAttachment(obj, mispEvent):
+def parseAttachment(obj, mispEvent, pkg):
     for idx in range(len(obj)):
 
         if obj[idx].properties.file_name:
@@ -195,7 +195,7 @@ def buildAttribute(pkg, mispEvent):
                         # FIXME that's definitely broken, but I have no sample.
                         #for att in obj.attachments:
                         if pkg.object_.related_objects:
-                            parseAttachment(pkg.object_.related_objects, mispEvent)
+                            parseAttachment(pkg.object_.related_objects, mispEvent, pkg)
                                 
                             #mispEvent.add_attribute('email-attachment', att.value,
                             #                        comment=pkg.title or None)
