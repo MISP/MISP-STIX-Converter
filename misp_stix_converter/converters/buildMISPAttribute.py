@@ -23,6 +23,19 @@ from cybox.objects import x509_certificate_object, win_executable_file_object, w
 ipre = re.compile("([0-9]{1,3}.){3}[0-9]{1,3}")
 log = logging.getLogger("__main__")
 
+def parseAttachment(obs)
+    for idx in range(len(obs)):
+        if hasattr(obs[idx].properties, 'file_name'):
+	    if obs[idx].properties.file_name:
+	        print('"'+indID+'","'+indTitle+'","'+indType+'","'+str(obs[idx].id_)+'","File|file_name","'+str(obs[idx].properties.file_name)+'","'+str(obsid)+'"')
+	
+        if hasattr(obs[idx].properties, 'hashes'):
+	    for idq in range(len(obs[idx].properties.hashes)):
+		print('"'+indID+'","'+indTitle+'","'+indType+'","'+str(obs[idx].id_)+'","File|Hash|'+str(obs[idx].properties.hashes[idq].type_)+'","'+str(obs[idx].properties.hashes[idq].simple_hash_value)+'","'+str(obsid)+'"')
+	    
+	if hasattr(obs[idx].properties, 'type_'):
+	    print('"'+indID+'","'+indTitle+'","'+indType+'","'+str(obs[idx].id_)+'","'+str(obs[idx].properties.type_)+'","'+str(obs[idx].properties.value)+'","'+str(obsid)+'"')
+
 
 def identifyHash(hsh):
     """
@@ -143,6 +156,9 @@ def buildAttribute(pkg, mispEvent):
                     if obj.sha256:
                         if len(obj.sha256) == 64:
                             mispEvent.add_attribute('sha256', six.text_type(obj.sha256), comment=pkg.title or None)
+                    #Added by Davide Baglieri (aka davidonzo)
+                    if obj.file_name
+                        mispEvent.add_attribute('filename', six.text_type(obj.file_name), comment=pkg.title or None)
 
 
                 elif type_ == email_message_object.EmailMessage:
@@ -192,4 +208,4 @@ def buildAttribute(pkg, mispEvent):
             pass  # Other objects. TODO.
     except Exception as ex:
         log.error(ex)
-    return mispEvent
+return mispEvent
