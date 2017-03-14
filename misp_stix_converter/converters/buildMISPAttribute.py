@@ -146,6 +146,14 @@ def buildAttribute(pkg, mispEvent):
                 elif type_ == file_object.File:
                     # This is a bit harder
                     # NOTE: Work in progress, only getting hashes
+                    
+                    #Added by Davide Baglieri (aka davidonzo)
+                    if obj.file_name:
+                        mispEvent.add_attribute('filename', six.text_type(obj.file_name), comment=pkg.title or None)
+                    if obj.size_in_bytes
+                        mispEvent.add_attribute('size-in-bytes', six.text_type(obj.size_in_bytes), comment=pkg.title or None)
+                    #Added by Davide Baglieri (aka davidonzo)
+                    
                     if obj.md5:
                         # We actually have to check the length
                         # An actual report had supposed md5s of length 31. Silly.
@@ -157,9 +165,6 @@ def buildAttribute(pkg, mispEvent):
                     if obj.sha256:
                         if len(obj.sha256) == 64:
                             mispEvent.add_attribute('sha256', six.text_type(obj.sha256), comment=pkg.title or None)
-                    #Added by Davide Baglieri (aka davidonzo)
-                    if obj.file_name:
-                        mispEvent.add_attribute('filename', six.text_type(obj.file_name), comment=pkg.title or None)
 
 
                 elif type_ == email_message_object.EmailMessage:
