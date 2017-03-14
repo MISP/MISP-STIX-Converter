@@ -24,18 +24,19 @@ ipre = re.compile("([0-9]{1,3}.){3}[0-9]{1,3}")
 log = logging.getLogger("__main__")
 
 def parseAttachment(obs):
-    for idx in range(len(obs)):
-        if hasattr(obs[idx].properties, 'file_name'):
-	    if obs[idx].properties.file_name:
-	        print('"'+indID+'","'+indTitle+'","'+indType+'","'+str(obs[idx].id_)+'","File|file_name","'+str(obs[idx].properties.file_name)+'","'+str(obsid)+'"')
+	for idx in range(len(obs)):
+		if hasattr(obs[idx].properties, 'file_name'):
+			if obs[idx].properties.file_name:
+				print('"'+indID+'","'+indTitle+'","'+indType+'","'+str(obs[idx].id_)+'","File|file_name","'+str(obs[idx].properties.file_name)+'","'+str(obsid)+'"')
 	
-        if hasattr(obs[idx].properties, 'hashes'):
-	    for idq in range(len(obs[idx].properties.hashes)):
-		print('"'+indID+'","'+indTitle+'","'+indType+'","'+str(obs[idx].id_)+'","File|Hash|'+str(obs[idx].properties.hashes[idq].type_)+'","'+str(obs[idx].properties.hashes[idq].simple_hash_value)+'","'+str(obsid)+'"')
+	if hasattr(obs[idx].properties, 'hashes'):
+		for idq in range(len(obs[idx].properties.hashes)):
+			print('"'+indID+'","'+indTitle+'","'+indType+'","'+str(obs[idx].id_)+'","File|Hash|'+str(obs[idx].properties.hashes[idq].type_)+'","'+str(obs[idx].properties.hashes[idq].simple_hash_value)+'","'+str(obsid)+'"')
 	    
 	if hasattr(obs[idx].properties, 'type_'):
-	    print('"'+indID+'","'+indTitle+'","'+indType+'","'+str(obs[idx].id_)+'","'+str(obs[idx].properties.type_)+'","'+str(obs[idx].properties.value)+'","'+str(obsid)+'"')
-
+		print('"'+indID+'","'+indTitle+'","'+indType+'","'+str(obs[idx].id_)+'","'+str(obs[idx].properties.type_)+'","'+str(obs[idx].properties.value)+'","'+str(obsid)+'"')
+	
+	return 0
 
 def identifyHash(hsh):
     """
