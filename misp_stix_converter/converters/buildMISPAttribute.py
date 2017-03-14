@@ -194,9 +194,9 @@ def buildAttribute(pkg, mispEvent):
                                                     comment=pkg.title or None)
                     if obj.attachments:
                         # FIXME that's definitely broken, but I have no sample.
-                        #for att in obj.attachments:
-                        if obj.related_objects:
-                            parseAttachment(obj, mispEvent)
+                        for att in obj.attachments:
+                            if obj.related_objects:
+                                parseAttachment(obj, mispEvent)
                                 
                             #mispEvent.add_attribute('email-attachment', att.value,
                             #                        comment=pkg.title or None)
