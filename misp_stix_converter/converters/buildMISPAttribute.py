@@ -25,26 +25,25 @@ log = logging.getLogger("__main__")
 
 #Added by Davide Baglieri (aka davidonzo)
 def parseAttachment(obj, mispEvent):
+    for idx in range(len(obs)):
 
-    if obj.file_name:
-        mispEvent.add_attribute('filename', six.text_type(obj.file_name), comment=pkg.title or None)
+        if obj[idx].properties.file_name:
+            mispEvent.add_attribute('filename', six.text_type(obj[idx].properties.file_name), comment=pkg.title or None)
 
-    if obj.size_in_bytes:
-        mispEvent.add_attribute('size-in-bytes', six.text_type(obj.size_in_bytes), comment=pkg.title or None)
+        if obj[idx].properties.size_in_bytes:
+            mispEvent.add_attribute('size-in-bytes', six.text_type(obj[idx].properties.size_in_bytes), comment=pkg.title or None)
  
-    if obj.md5:
-# We actually have to check the length
-# An actual report had supposed md5s of length 31. Silly.
-        if len(obj.md5) == 32:
-            mispEvent.add_attribute('md5', six.text_type(obj.md5), comment=pkg.title or None)
+        if obj[idx].md5:
+            if len(obj.properties.md5) == 32:
+                mispEvent.add_attribute('md5', six.text_type(obj[idx].properties.md5), comment=pkg.title or None)
     
-    if obj.sha1:
-        if len(obj.sha1) == 40:
-            mispEvent.add_attribute('sha1', six.text_type(obj.sha1), comment=pkg.title or None)
+        if obj[idx].sha1:
+            if len(obj.sha1) == 40:
+                mispEvent.add_attribute('sha1', six.text_type(obj[idx].sha1), comment=pkg.title or None)
 
-    if obj.sha256:
-        if len(obj.sha256) == 64:
-            mispEvent.add_attribute('sha256', six.text_type(obj.sha256), comment=pkg.title or None)
+        if obj[idx].sha256:
+            if len(obj.sha256) == 64:
+                mispEvent.add_attribute('sha256', six.text_type(obj[idx].sha256), comment=pkg.title or None)
 
     return mispEvent
 #Added by Davide Baglieri (aka davidonzo)
