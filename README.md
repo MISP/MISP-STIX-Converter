@@ -1,5 +1,5 @@
-#MISP to STIX and back again
-##Or at least that's the idea
+# MISP to STIX and back again
+## Or at least that's the idea
 
 [![Coverage Status](https://coveralls.io/repos/github/MISP/MISP-STIX-Converter/badge.svg?branch=master)](https://coveralls.io/github/MISP/MISP-STIX-Converter?branch=master)
 [![Build Status](https://travis-ci.org/MISP/MISP-STIX-Converter.svg?branch=master)](https://travis-ci.org/MISP/MISP-STIX-Converter)
@@ -10,7 +10,7 @@ sync script. It's a bit limited, and it isn't perfect, nor is it bug-free.
 
 But it works™
 
-##Installation
+## Installation
 
 If you don't wanna use git, 
 ```bash
@@ -27,7 +27,7 @@ This should install everything it needs!
 
 Useful, huh?
 
-###The config file
+### The config file
 
 Copy over the example config to a live version
 
@@ -39,9 +39,9 @@ overridden with the `-c FILE` flag when running the scripts.
 Then open it and change the variables. This is YAML format, so make sure
 you don't do a silly and format it wrong!
 
-##Usage
+## Usage
 
-###For MISP to STIX: 
+### For MISP to STIX: 
 
 To get all usage information:
 
@@ -62,7 +62,7 @@ Alternatively, if you want to pull every event of a certain tag, you can run
 
 Which will write all "tlp:white" tagged events to a file formatted by the event's ID, e.g out.29.xml
 
-###For STIX to MISP
+### For STIX to MISP
 
 This *only* works if you have a live MISP instance to connect the API
 to. 
