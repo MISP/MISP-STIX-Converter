@@ -23,6 +23,54 @@ from cybox.objects import x509_certificate_object, win_executable_file_object, w
 ipre = re.compile("([0-9]{1,3}.){3}[0-9]{1,3}")
 log = logging.getLogger("__main__")
 
+def parseRelated(obj, mispEvent, pkg):
+    for idx in range(len(obj)):
+
+        if obj[idx].properties.file_name:
+            mispEvent.add_attribute('filename', six.text_type(obj[idx].properties.file_name), comment=pkg.title or None)
+
+        if obj[idx].properties.size_in_bytes:
+            mispEvent.add_attribute('size-in-bytes', six.text_type(obj[idx].properties.size_in_bytes), comment=pkg.title or None)
+ 
+        if obj[idx].properties.md5:
+            if len(obj[idx].properties.md5) == 32:
+                mispEvent.add_attribute('email-attachment', six.text_type(obj[idx].properties.md5), comment=pkg.title or None)
+    
+        if obj[idx].properties.sha1:
+            if len(obj[idx].properties.sha1) == 40:
+                mispEvent.add_attribute('email-attachment', six.text_type(obj[idx].properties.sha1), comment=pkg.title or None)
+
+        if obj[idx].properties.sha256:
+            if len(obj[idx].properties.sha256) == 64:
+                mispEvent.add_attribute('email-attachment', six.text_type(obj[idx].properties.sha256), comment=pkg.title or None)
+
+    return mispEvent
+
+#Added by Davide Baglieri (aka davidonzo)
+def parseAttachment(obj, mispEvent, pkg):
+    for idx in range(len(obj)):
+
+        if obj[idx].properties.file_name:
+            mispEvent.add_attribute('filename', six.text_type(obj[idx].properties.file_name), comment=pkg.title or None)
+
+        if obj[idx].properties.size_in_bytes:
+            mispEvent.add_attribute('size-in-bytes', six.text_type(obj[idx].properties.size_in_bytes), comment=pkg.title or None)
+ 
+        if obj[idx].properties.md5:
+            if len(obj[idx].properties.md5) == 32:
+                mispEvent.add_attribute('md5', six.text_type(obj[idx].properties.md5), comment=pkg.title or None)
+    
+        if obj[idx].properties.sha1:
+            if len(obj[idx].properties.sha1) == 40:
+                mispEvent.add_attribute('sha1', six.text_type(obj[idx].properties.sha1), comment=pkg.title or None)
+
+        if obj[idx].properties.sha256:
+            if len(obj[idx].properties.sha256) == 64:
+                mispEvent.add_attribute('sha256', six.text_type(obj[idx].properties.sha256), comment=pkg.title or None)
+
+    return mispEvent
+#Added by Davide Baglieri (aka davidonzo)
+    
 
 def identifyHash(hsh):
     """
@@ -132,6 +180,14 @@ def buildAttribute(pkg, mispEvent):
                 elif type_ == file_object.File:
                     # This is a bit harder
                     # NOTE: Work in progress, only getting hashes
+                    
+                    #Added by Davide Baglieri (aka davidonzo)
+                    if obj.file_name:
+                        mispEvent.add_attribute('filename', six.text_type(obj.file_name), comment=pkg.title or None)
+                    if obj.size_in_bytes:
+                        mispEvent.add_attribute('size-in-bytes', six.text_type(obj.size_in_bytes), comment=pkg.title or None)
+                    #Added by Davide Baglieri (aka davidonzo)
+                    
                     if obj.md5:
                         # We actually have to check the length
                         # An actual report had supposed md5s of length 31. Silly.
@@ -160,9 +216,14 @@ def buildAttribute(pkg, mispEvent):
                                                     comment=pkg.title or None)
                     if obj.attachments:
                         # FIXME that's definitely broken, but I have no sample.
-                        for att in obj.attachments:
-                            mispEvent.add_attribute('email-attachment', att.value,
-                                                    comment=pkg.title or None)
+                        #for att in obj.attachments:
+						
+						#OK. Fixed! Please, review the changes :-)
+                        if pkg.object_.related_objects:
+                            parseAttachment(pkg.object_.related_objects, mispEvent, pkg)
+                                
+                            #mispEvent.add_attribute('email-attachment', att.value,
+                            #                        comment=pkg.title or None)
                 elif type_ == mutex_object.Mutex:
                     mispEvent.add_attribute('mutex', six.text_type(obj.name), comment=pkg.title or None)
                 elif type_ == whois_object.WhoisEntry:
