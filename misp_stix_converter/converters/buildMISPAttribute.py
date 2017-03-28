@@ -23,55 +23,170 @@ from cybox.objects import x509_certificate_object, win_executable_file_object, w
 ipre = re.compile("([0-9]{1,3}.){3}[0-9]{1,3}")
 log = logging.getLogger("__main__")
 
+# Dedicated to parse related object
+# Support for first level "objRel.related_objects"
 def parseRelated(obj, mispEvent, pkg):
-    for i in obj:
-
-        if i.properties.file_name:
-            mispEvent.add_attribute('filename', six.text_type(i.properties.file_name), comment=pkg.title or None)
-
-        if i.properties.size_in_bytes:
-            mispEvent.add_attribute('size-in-bytes', six.text_type(i.properties.size_in_bytes), comment=pkg.title or None)
- 
-        if i.properties.md5:
-            if len(i.properties.md5) == 32:
-                mispEvent.add_attribute('email-attachment', six.text_type(i.properties.md5), comment=pkg.title or None)
     
-        if i.properties.sha1:
-            if len(i.properties.sha1) == 40:
-                mispEvent.add_attribute('email-attachment', six.text_type(i.properties.sha1), comment=pkg.title or None)
+    for i in obj.related_object:
+        type_ = type(i.properties)
+        # Here comes the sun (and of course the fun) for related objects! (DB)
+        if type_ == address_object.Address:
+            buildAddressAttribute(i.properties, mispEvent, pkg)
+                    
+        elif type_ == domain_name_object.DomainName:
+            buildDomainNameAttribute(i.properties, mispEvent, pkg)
+                    
+        elif type_ == hostname_object.Hostname:
+            buildHostnameAttribute(i.properties, mispEvent, pkg)
+                    
+        elif type_ == uri_object.URI:
+            buildURIAttribute(i.properties, mispEvent, pkg)
+                
+        elif type_ == file_object.File:
+            buildFileAttribute(i.properties, mispEvent, pkg)
 
-        if i.properties.sha256:
-            if len(i.properties.sha256) == 64:
-                mispEvent.add_attribute('email-attachment', six.text_type(i.properties.sha256), comment=pkg.title or None)
-
+        elif type_ == email_message_object.EmailMessage:
+            buildEmailMessageAttribute(i.properties, mispEvent, pkg)
+        else:
+            pass
+            
     return mispEvent
 
 #Added by Davide Baglieri (aka davidonzo)
 #Just limited support for email attachments, just consider this a work in progress
 def parseAttachment(obj, mispEvent, pkg):
     for i in obj:
-
-        if i.properties.file_name:
-            mispEvent.add_attribute('filename', six.text_type(i.properties.file_name), comment=pkg.title or None)
-
-        if i.properties.size_in_bytes:
-            mispEvent.add_attribute('size-in-bytes', six.text_type(i.properties.size_in_bytes), comment=pkg.title or None)
- 
-        if i.properties.md5:
-            if len(i.properties.md5) == 32:
-                mispEvent.add_attribute('md5', six.text_type(i.properties.md5), comment=pkg.title or None)
-    
-        if i.properties.sha1:
-            if len(i.properties.sha1) == 40:
-                mispEvent.add_attribute('sha1', six.text_type(i.properties.sha1), comment=pkg.title or None)
-
-        if i.properties.sha256:
-            if len(i.properties.sha256) == 64:
-                mispEvent.add_attribute('sha256', six.text_type(i.properties.sha256), comment=pkg.title or None)
+        # Assuming any email attached file is a... file!
+        buildFileAttribute(i.properties, mispEvent, pkg)
 
     return mispEvent
 #Added by Davide Baglieri (aka davidonzo)
+
+# Dedicated to File object
+def buildFileAttribute(obj, mispEvent, pkg, objRel=False):
+
+    # All you can get by a File object in a single method
+    # TODO: all possible attributes are not yet parsed
+	
+    if obj.file_name:
+        mispEvent.add_attribute('filename', six.text_type(obj.file_name), comment=pkg.title or None)
+        
+    # Added support to file_extension
+    # No MISP object available for file extension
+    # I propose to use pattern-in-file. Suggestions are welcome! (DB)
+    if obj.file_extension:
+        mispEvent.add_attribute('pattern-in-file', six.text_type(obj.file_extension), comment=pkg.title or None)
+        
+    if obj.size_in_bytes:
+        mispEvent.add_attribute('size-in-bytes', six.text_type(obj.size_in_bytes), comment=pkg.title or None)
+        
+    if obj.md5:
+    # We actually have to check the length
+    # An actual report had supposed md5s of length 31. Silly.
+        if len(obj.md5) == 32:
+            mispEvent.add_attribute('md5', six.text_type(obj.md5), comment=pkg.title or None)
     
+    if obj.sha1:
+        if len(obj.sha1) == 40:
+            mispEvent.add_attribute('sha1', six.text_type(obj.sha1), comment=pkg.title or None)
+
+    if obj.sha256:
+        if len(obj.sha256) == 64:
+            mispEvent.add_attribute('sha256', six.text_type(obj.sha256), comment=pkg.title or None)	
+    
+    # Added support for SHA512 (DB)
+    if obj.sha512:
+        if len(obj.sha512) == 128:
+            mispEvent.add_attribute('sha512', six.text_type(obj.sha512), comment=pkg.title or None)
+            
+    if objRel:
+        if pkg.object_.related_objects:
+            parseRelated(pkg.object_.related_objects, mispEvent, pkg)
+    
+    return mispEvent
+    
+# Dedicated to Address Object (DB)
+def buildAddressAttribute(obj, mispEvent, pkg, objRel=False):
+
+    if obj.is_source:
+        mispEvent.add_attribute('ip-src', six.text_type(obj.address_value), comment=pkg.title or None)
+    
+    elif obj.is_destination:
+        mispEvent.add_attribute('ip-dst', six.text_type(obj.address_value), comment=pkg.title or None)
+    else:
+    # We don't know, first check if it's an IP range
+        if hasattr(obj, "condition") and obj.condition:
+            if obj.condition == "InclusiveBetween":
+            # Ok, so it's a range. hm. Shall we add them seperately#comma#or together?
+                mispEvent.add_attribute('ip-dst', six.text_type(obj.address_value[0]))
+                mispEvent.add_attribute('ip-dst', six.text_type(obj.add_attribute[1]))
+            elif obj.condition == "Equals":
+                mispEvent.add_attribute('ip-dst', six.text_type(obj.address_value), comment=pkg.title or None)
+            else:
+            # Unknown condition
+                pass
+        else:
+            # Don't have anything to go on
+            mispEvent.add_attribute('ip-dst', six.text_type(obj.address_value), comment=pkg.title or None)
+            
+    if objRel:
+        if pkg.object_.related_objects:
+            parseRelated(pkg.object_.related_objects, mispEvent, pkg)
+    
+    return mispEvent
+
+# Dedicated to EmailMessage (DB)
+def buildEmailMessageAttribute(obj, mispEvent, pkg, objRel=False):
+    if obj.header:
+        # We have a header, can check for to/from etc etc
+        if obj.header.from_:
+            mispEvent.add_attribute('email-src', six.text_type(obj.header.from_.address_value), comment=pkg.title or None)
+        if obj.header.to:
+            for mail in obj.header.to:
+                mispEvent.add_attribute('email-dst', six.text_type(mail.address_value), comment=pkg.title or None)
+        if obj.header.subject:
+            mispEvent.add_attribute('email-subject', six.text_type(obj.header.subject), comment=pkg.title or None)
+            
+    if obj.attachments:                    
+        if pkg.object_.related_objects:
+            parseAttachment(pkg.object_.related_objects, mispEvent, pkg)
+            
+    elif objRel:
+        if pkg.object_.related_objects:
+            parseRelated(pkg.object_.related_objects, mispEvent, pkg)
+    
+            
+    return mispEvent
+
+# Dedicated to Domain name (DB)
+def buildDomainNameAttribute(obj, mispEvent, pkg, objRel=False):
+    mispEvent.add_attribute('domain', six.text_type(obj.value), comment=pkg.title or None)
+    
+    if objRel:
+        if pkg.object_.related_objects:
+            parseRelated(pkg.object_.related_objects, mispEvent, pkg)
+    
+    return mispEvent
+
+# Dedicated to Hostname (DB)
+def buildHostnameAttribute(obj, mispEvent, pkg, objRel=False):
+    mispEvent.add_attribute('hostname', six.text_type(obj.hostname_value), comment=pkg.title or None)
+    
+    if objRel:
+        if pkg.object_.related_objects:
+            parseRelated(pkg.object_.related_objects, mispEvent, pkg)
+    
+    return mispEvent
+
+# Dedicated to URI (DB)
+def buildURIAttribute(obj, mispEvent, pkg, objRel=False):
+    mispEvent.add_attribute('url', six.text_type(obj.value), comment=pkg.title or None)
+    
+    if objRel:
+        if pkg.object_.related_objects:
+            parseRelated(pkg.object_.related_objects, mispEvent, pkg)
+    
+    return mispEvent
 
 def identifyHash(hsh):
     """
@@ -140,85 +255,35 @@ def buildAttribute(pkg, mispEvent):
         # Check if the object is a cybox observable
         if isinstance(pkg, cybox.core.observable.Observable):
             if hasattr(pkg, "object_") and pkg.object_:
+                
                 obj = pkg.object_.properties
+                
                 # It's a proper object!
                 type_ = type(obj)
                 # Here comes the fun!
                 if type_ == address_object.Address:
-                    # We've got an address object, naturally
-                    # We can check if it's a source or dest
-                    if obj.is_source:
-                        mispEvent.add_attribute('ip-src', six.text_type(obj.address_value),
-                                                comment=pkg.title or None)
-                    elif obj.is_destination:
-                        mispEvent.add_attribute('ip-dst', six.text_type(obj.address_value),
-                                                comment=pkg.title or None)
-                    else:
-                        # We don't know, first check if it's an IP range
-                        if hasattr(obj, "condition") and obj.condition:
-                            if obj.condition == "InclusiveBetween":
-                                # Ok, so it's a range. hm. Shall we add them seperately#comma#or together?
-                                mispEvent.add_attribute('ip-dst', six.text_type(obj.address_value[0]))
-                                mispEvent.add_attribute('ip-dst', six.text_type(obj.add_attribute[1]))
-                            elif obj.condition == "Equals":
-                                mispEvent.add_attribute('ip-dst', six.text_type(obj.address_value),
-                                                        comment=pkg.title or None)
-                            else:
-                                # Unknown condition
-                                pass
-                        else:
-                            # Don't have anything to go on
-                            mispEvent.add_attribute('ip-dst', six.text_type(obj.address_value),
-                                                    comment=pkg.title or None)
+                    # Now script uses buildAddressAttribute (DB)
+                    buildAddressAttribute(obj, mispEvent, pkg, True)
+                    
                 elif type_ == domain_name_object.DomainName:
-                    mispEvent.add_attribute('domain', six.text_type(obj.value), comment=pkg.title or None)
+                    # Now script uses buildDomainNameAttribute (DB)
+                    buildDomainNameAttribute(obj, mispEvent, pkg, True)
+                    
                 elif type_ == hostname_object.Hostname:
-                    mispEvent.add_attribute('hostname', six.text_type(obj.hostname_value),
-                                            comment=pkg.title or None)
+                    # Now script uses buildHostnameAttribute
+                    buildHostnameAttribute(obj, mispEvent, pkg, True)
+                    
                 elif type_ == uri_object.URI:
-                    mispEvent.add_attribute('url', six.text_type(obj.value),
-                                            comment=pkg.title or None)
+                    # Now script uses buildURIAttribute (DB)
+                    buildURIAttribute(obj, mispEvent, pkg, True)
+                
                 elif type_ == file_object.File:
-                    # This is a bit harder
-                    # NOTE: Work in progress, only getting hashes
-                    
-                    #Added by Davide Baglieri (aka davidonzo)
-                    if obj.file_name:
-                        mispEvent.add_attribute('filename', six.text_type(obj.file_name), comment=pkg.title or None)
-                    if obj.size_in_bytes:
-                        mispEvent.add_attribute('size-in-bytes', six.text_type(obj.size_in_bytes), comment=pkg.title or None)
-                    #Added by Davide Baglieri (aka davidonzo)
-                    
-                    if obj.md5:
-                        # We actually have to check the length
-                        # An actual report had supposed md5s of length 31. Silly.
-                        if len(obj.md5) == 32:
-                            mispEvent.add_attribute('md5', six.text_type(obj.md5), comment=pkg.title or None)
-                    if obj.sha1:
-                        if len(obj.sha1) == 40:
-                            mispEvent.add_attribute('sha1', six.text_type(obj.sha1), comment=pkg.title or None)
-                    if obj.sha256:
-                        if len(obj.sha256) == 64:
-                            mispEvent.add_attribute('sha256', six.text_type(obj.sha256), comment=pkg.title or None)
-
+                    # Now script uses buildFileAttribute (DB)
+                    buildFileAttribute(obj, mispEvent, pkg, True)
 
                 elif type_ == email_message_object.EmailMessage:
-                    if obj.header:
-                        # We have a header, can check for to/from etc etc
-                        if obj.header.from_:
-                            mispEvent.add_attribute('email-src', six.text_type(obj.header.from_.address_value),
-                                                    comment=pkg.title or None)
-                        if obj.header.to:
-                            for mail in obj.header.to:
-                                mispEvent.add_attribute('email-dst', six.text_type(mail.address_value),
-                                                        comment=pkg.title or None)
-                        if obj.header.subject:
-                            mispEvent.add_attribute('email-subject', six.text_type(obj.header.subject),
-                                                    comment=pkg.title or None)
-                    if obj.attachments:
-                        
-                        if pkg.object_.related_objects:
-                            parseAttachment(pkg.object_.related_objects, mispEvent, pkg)
+                    # Now script uses buildEmailMessageAttribute (DB)
+                    buildEmailMessageAttribute(obj, mispEvent, pkg, True)
                 
                 elif type_ == mutex_object.Mutex:
                     mispEvent.add_attribute('mutex', six.text_type(obj.name), comment=pkg.title or None)
