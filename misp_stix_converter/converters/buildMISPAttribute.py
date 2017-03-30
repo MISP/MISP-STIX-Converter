@@ -65,7 +65,7 @@ def buildFileAttribute(obj, mispEvent, pkg, importRelated=False):
 
     # All you can get by a File object in a single method
     # TODO: all possible attributes are not yet parsed
-	
+
     if obj.file_name:
         mispEvent.add_attribute('filename', six.text_type(obj.file_name), comment=pkg.title or None)
         
@@ -79,8 +79,8 @@ def buildFileAttribute(obj, mispEvent, pkg, importRelated=False):
         mispEvent.add_attribute('size-in-bytes', six.text_type(obj.size_in_bytes), comment=pkg.title or None)
         
     if obj.md5:
-    # We actually have to check the length
-    # An actual report had supposed md5s of length 31. Silly.
+        # We actually have to check the length
+        # An actual report had supposed md5s of length 31. Silly.
         if len(obj.md5) == 32:
             mispEvent.add_attribute('md5', six.text_type(obj.md5), comment=pkg.title or None)
     
@@ -90,16 +90,15 @@ def buildFileAttribute(obj, mispEvent, pkg, importRelated=False):
 
     if obj.sha256:
         if len(obj.sha256) == 64:
-            mispEvent.add_attribute('sha256', six.text_type(obj.sha256), comment=pkg.title or None)	
+            mispEvent.add_attribute('sha256', six.text_type(obj.sha256), comment=pkg.title or None)
     
     # Added support for SHA512 (DB)
     if obj.sha512:
         if len(obj.sha512) == 128:
             mispEvent.add_attribute('sha512', six.text_type(obj.sha512), comment=pkg.title or None)
             
-    if importRelated:
-        if pkg.object_.related_objects:
-            parseRelated(pkg.object_.related_objects, mispEvent, pkg)
+    if importRelated and pkg.object_.related_objects:
+        parseRelated(pkg.object_.related_objects, mispEvent, pkg)
     
     return mispEvent
     
@@ -112,10 +111,10 @@ def buildAddressAttribute(obj, mispEvent, pkg, importRelated=False):
     elif obj.is_destination:
         mispEvent.add_attribute('ip-dst', six.text_type(obj.address_value), comment=pkg.title or None)
     else:
-    # We don't know, first check if it's an IP range
+        # We don't know, first check if it's an IP range
         if hasattr(obj, "condition") and obj.condition:
             if obj.condition == "InclusiveBetween":
-            # Ok, so it's a range. hm. Shall we add them seperately#comma#or together?
+                # Ok, so it's a range. hm. Shall we add them seperately#comma#or together?
                 mispEvent.add_attribute('ip-dst', six.text_type(obj.address_value[0]))
                 mispEvent.add_attribute('ip-dst', six.text_type(obj.add_attribute[1]))
             elif obj.condition == "Equals":
@@ -124,9 +123,8 @@ def buildAddressAttribute(obj, mispEvent, pkg, importRelated=False):
             # Don't have anything to go on
             mispEvent.add_attribute('ip-dst', six.text_type(obj.address_value), comment=pkg.title or None)
             
-    if importRelated:
-        if pkg.object_.related_objects:
-            parseRelated(pkg.object_.related_objects, mispEvent, pkg)
+    if importRelated and pkg.object_.related_objects:
+        parseRelated(pkg.object_.related_objects, mispEvent, pkg)
     
     return mispEvent
 
@@ -143,10 +141,10 @@ def buildEmailMessageAttribute(obj, mispEvent, pkg, importRelated=False):
             mispEvent.add_attribute('email-subject', six.text_type(obj.header.subject), comment=pkg.title or None)
             
     if obj.attachments and pkg.object_.related_objects:
-            parseAttachment(pkg.object_.related_objects, mispEvent, pkg)
+        parseAttachment(pkg.object_.related_objects, mispEvent, pkg)
             
     elif importRelated and pkg.object_.related_objects:
-            parseRelated(pkg.object_.related_objects, mispEvent, pkg)
+        parseRelated(pkg.object_.related_objects, mispEvent, pkg)
     
             
     return mispEvent
@@ -156,7 +154,7 @@ def buildDomainNameAttribute(obj, mispEvent, pkg, importRelated=False):
     mispEvent.add_attribute('domain', six.text_type(obj.value), comment=pkg.title or None)
     
     if importRelated and pkg.object_.related_objects:
-            parseRelated(pkg.object_.related_objects, mispEvent, pkg)
+        parseRelated(pkg.object_.related_objects, mispEvent, pkg)
     
     return mispEvent
 
@@ -165,7 +163,7 @@ def buildHostnameAttribute(obj, mispEvent, pkg, importRelated=False):
     mispEvent.add_attribute('hostname', six.text_type(obj.hostname_value), comment=pkg.title or None)
     
     if importRelated and pkg.object_.related_objects:
-            parseRelated(pkg.object_.related_objects, mispEvent, pkg)
+        parseRelated(pkg.object_.related_objects, mispEvent, pkg)
     
     return mispEvent
 
@@ -174,7 +172,7 @@ def buildURIAttribute(obj, mispEvent, pkg, importRelated=False):
     mispEvent.add_attribute('url', six.text_type(obj.value), comment=pkg.title or None)
     
     if importRelated and pkg.object_.related_objects:
-            parseRelated(pkg.object_.related_objects, mispEvent, pkg)
+        parseRelated(pkg.object_.related_objects, mispEvent, pkg)
     
     return mispEvent
 
