@@ -12,7 +12,7 @@ from misp_stix_converter.converters.lint_roller import lintRoll
 from stix.core import STIXPackage
 
 # Cybox cybox don't we all love cybox children
-from cybox.objects import email_message_object, file_object, address_object
+from cybox.objects import email_message_object, file_object, address_object, socket_address_object
 from cybox.objects import domain_name_object, hostname_object, uri_object
 from cybox.objects import mutex_object, whois_object
 from cybox.objects import as_object, http_session_object
@@ -38,7 +38,13 @@ def parseRelated(obj, mispEvent, pkg):
                     
         elif type_ == hostname_object.Hostname:
             buildHostnameAttribute(i.properties, mispEvent, pkg)
-                    
+
+        elif type_ == socket_address_object.SocketAddress:
+            if obj.ip_address:
+                buildAddressAttribute(obj.ip_address, mispEvent, pkg, True)
+            if obj.hostname:
+                buildHostnameAttribute(obj.hostname, mispEvent, pkg, True)
+
         elif type_ == uri_object.URI:
             buildURIAttribute(i.properties, mispEvent, pkg)
                 
@@ -261,6 +267,12 @@ def buildAttribute(pkg, mispEvent):
                     # Now script uses buildHostnameAttribute
                     buildHostnameAttribute(obj, mispEvent, pkg, True)
                     
+                elif type_ == socket_address_object.SocketAddress:
+                    if obj.ip_address:
+                        buildAddressAttribute(obj.ip_address, mispEvent, pkg, True)
+                    if obj.hostname:
+                        buildHostnameAttribute(obj.hostname, mispEvent, pkg, True)
+
                 elif type_ == uri_object.URI:
                     # Now script uses buildURIAttribute (DB)
                     buildURIAttribute(obj, mispEvent, pkg, True)
