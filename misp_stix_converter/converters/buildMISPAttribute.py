@@ -71,6 +71,9 @@ def buildEvent(pkg, **kwargs):
     event.threat_level_id = kwargs.get("threat_level_id", 3)
     event.analysis = kwargs.get("analysis", 0)
     event.info = title
+    
+    if pkg.description:
+        event.add_attribute("comment", pkg.description)
 
     ids = []
     to_process = []
