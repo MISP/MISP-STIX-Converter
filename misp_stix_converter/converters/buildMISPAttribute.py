@@ -230,7 +230,7 @@ def buildEvent(pkg, **kwargs):
     event.analysis = kwargs.get("analysis", 0)
     event.info = title
     
-    if pkg.description:
+    if pkg.hasattr("description"):
         event.add_attribute("comment", pkg.description)
 
     ids = []
