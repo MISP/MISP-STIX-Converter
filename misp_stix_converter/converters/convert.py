@@ -10,7 +10,7 @@ import json
 import base64
 import random
 import sys
-
+import re
 from pymisp import mispevent
 
 # Stix imports
@@ -114,7 +114,8 @@ def load_stix(stix):
 
         # O I have idea for sneak
         # Will be very sneak
-
+        # PURGE THE US-CERT'S THING
+        stix =  re.sub(r"<marking.*/marking:Marking>", "", stix, flags=re.DOTALL)
         # Write the (probably) XML to file
         f.write(stix.encode("utf-8"))
 
