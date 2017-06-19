@@ -152,7 +152,7 @@ def STIXtoMISP(stix, mispAPI, **kwargs):
                 filename = stixPackage.stix_header.title + ".xml"
     misp_event = buildMISPAttribute.buildEvent(stixPackage, **kwargs)
     b64Pkg = base64.b64encode(stixPackage.to_xml()).decode("utf-8")
-    misp_event.add_attribute(type="attachment", value=filename, data=b64Pkg)
+    misp_event.add_attribute(type_="attachment", value=filename, data=b64Pkg)
     if misp_event.attributes:
         response = mispAPI.add_event(json.dumps(misp_event, cls=mispevent.EncodeUpdate))
         if response.get('errors'):
