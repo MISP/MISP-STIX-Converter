@@ -23,6 +23,12 @@ from cybox.objects import x509_certificate_object, win_executable_file_object, w
 ipre = re.compile("([0-9]{1,3}.){3}[0-9]{1,3}")
 log = logging.getLogger("__main__")
 
+def ast_eval(node):
+    try:
+        return ast.literal_eval(node)
+    except ValueError:
+        return str(node)
+
 # Dedicated to parse related object
 # Support for first level "importRelated.related_objects"
 def parseRelated(obj, mispEvent, pkg):
@@ -42,8 +48,8 @@ def parseRelated(obj, mispEvent, pkg):
         elif type_ == socket_address_object.SocketAddress:
             if obj.ip_address:
                 buildAddressAttribute(obj.ip_address, mispEvent, pkg, True)
-            if obj.hostname:
-                buildHostnameAttribute(obj.hostname, mispEvent, pkg, True)
+        if obj.hostname:
+            buildHostnameAttribute(obj.hostname, mispEvent, pkg, True)
 
         elif type_ == uri_object.URI:
             buildURIAttribute(i.properties, mispEvent, pkg)
@@ -73,35 +79,35 @@ def buildFileAttribute(obj, mispEvent, pkg, importRelated=False):
     # TODO: all possible attributes are not yet parsed
 
     if obj.file_name:
-        mispEvent.add_attribute('filename', ast.literal_eval(str(obj.file_name)), comment=pkg.title or None)
+        mispEvent.add_attribute('filename', ast_eval(str(obj.file_name)), comment=pkg.title or None)
 
     # Added support to file_extension
     # No MISP object available for file extension
     # I propose to use pattern-in-file. Suggestions are welcome! (DB)
     if obj.file_extension:
-        mispEvent.add_attribute('pattern-in-file', ast.literal_eval(str(obj.file_extension)), comment=pkg.title or None)
+        mispEvent.add_attribute('pattern-in-file', ast_eval(str(obj.file_extension)), comment=pkg.title or None)
 
     if obj.size_in_bytes:
-        mispEvent.add_attribute('size-in-bytes', ast.literal_eval(str(obj.size_in_bytes)), comment=pkg.title or None)
+        mispEvent.add_attribute('size-in-bytes', ast_eval(str(obj.size_in_bytes)), comment=pkg.title or None)
 
     if obj.md5:
         # We actually have to check the length
         # An actual report had supposed md5s of length 31. Silly.
         if len(obj.md5) == 32:
-            mispEvent.add_attribute('md5', ast.literal_eval(str(obj.md5)), comment=pkg.title or None)
+            mispEvent.add_attribute('md5', ast_eval(str(obj.md5)), comment=pkg.title or None)
 
     if obj.sha1:
         if len(obj.sha1) == 40:
-            mispEvent.add_attribute('sha1', ast.literal_eval(str(obj.sha1)), comment=pkg.title or None)
+            mispEvent.add_attribute('sha1', ast_eval(str(obj.sha1)), comment=pkg.title or None)
 
     if obj.sha256:
         if len(obj.sha256) == 64:
-            mispEvent.add_attribute('sha256', ast.literal_eval(str(obj.sha256)), comment=pkg.title or None)
+            mispEvent.add_attribute('sha256', ast_eval(str(obj.sha256)), comment=pkg.title or None)
 
     # Added support for SHA512 (DB)
     if obj.sha512:
         if len(obj.sha512) == 128:
-            mispEvent.add_attribute('sha512', ast.literal_eval(str(obj.sha512)), comment=pkg.title or None)
+            mispEvent.add_attribute('sha512', ast_eval(str(obj.sha512)), comment=pkg.title or None)
 
     if importRelated and pkg.object_.related_objects:
         parseRelated(pkg.object_.related_objects, mispEvent, pkg)
@@ -112,22 +118,22 @@ def buildFileAttribute(obj, mispEvent, pkg, importRelated=False):
 def buildAddressAttribute(obj, mispEvent, pkg, importRelated=False):
 
     if obj.is_source:
-        mispEvent.add_attribute('ip-src', ast.literal_eval(str(obj.address_value)), comment=pkg.title or None)
+        mispEvent.add_attribute('ip-src', ast_eval(str(obj.address_value)), comment=pkg.title or None)
 
     elif obj.is_destination:
-        mispEvent.add_attribute('ip-dst', ast.literal_eval(str(obj.address_value)), comment=pkg.title or None)
+        mispEvent.add_attribute('ip-dst', ast_eval(str(obj.address_value)), comment=pkg.title or None)
     else:
         # We don't know, first check if it's an IP range
         if hasattr(obj, "condition") and obj.condition:
             if obj.condition == "InclusiveBetween":
                 # Ok, so it's a range. hm. Shall we add them seperately#comma#or together?
-                mispEvent.add_attribute('ip-dst', ast.literal_eval(str(obj.address_value[0])))
-                mispEvent.add_attribute('ip-dst', ast.literal_eval(str(obj.add_attribute[1])))
+                mispEvent.add_attribute('ip-dst', ast_eval(str(obj.address_value[0])))
+                mispEvent.add_attribute('ip-dst', ast_eval(str(obj.add_attribute[1])))
             elif obj.condition == "Equals":
-                mispEvent.add_attribute('ip-dst', ast.literal_eval(str(obj.address_value)), comment=pkg.title or None)
+                mispEvent.add_attribute('ip-dst', ast_eval(str(obj.address_value)), comment=pkg.title or None)
         else:
             # Don't have anything to go on
-            mispEvent.add_attribute('ip-dst', ast.literal_eval(str(obj.address_value)), comment=pkg.title or None)
+            mispEvent.add_attribute('ip-dst', ast_eval(str(obj.address_value)), comment=pkg.title or None)
 
     if importRelated and pkg.object_.related_objects:
         parseRelated(pkg.object_.related_objects, mispEvent, pkg)
@@ -139,12 +145,12 @@ def buildEmailMessageAttribute(obj, mispEvent, pkg, importRelated=False):
     if obj.header:
         # We have a header, can check for to/from etc etc
         if obj.header.from_:
-            mispEvent.add_attribute('email-src', ast.literal_eval(str(obj.header.from_.address_value)), comment=pkg.title or None)
+            mispEvent.add_attribute('email-src', ast_eval(str(obj.header.from_.address_value)), comment=pkg.title or None)
         if obj.header.to:
             for mail in obj.header.to:
-                mispEvent.add_attribute('email-dst', ast.literal_eval(mail.address_value), comment=pkg.title or None)
+                mispEvent.add_attribute('email-dst', ast_eval(mail.address_value), comment=pkg.title or None)
         if obj.header.subject:
-            mispEvent.add_attribute('email-subject', ast.literal_eval(str(obj.header.subject)), comment=pkg.title or None)
+            mispEvent.add_attribute('email-subject', ast_eval(str(obj.header.subject)), comment=pkg.title or None)
 
     if obj.attachments and pkg.object_.related_objects:
         parseAttachment(pkg.object_.related_objects, mispEvent, pkg)
@@ -157,7 +163,7 @@ def buildEmailMessageAttribute(obj, mispEvent, pkg, importRelated=False):
 
 # Dedicated to Domain name (DB)
 def buildDomainNameAttribute(obj, mispEvent, pkg, importRelated=False):
-    mispEvent.add_attribute('domain', ast.literal_eval(str(obj.value)), comment=pkg.title or None)
+    mispEvent.add_attribute('domain', ast_eval(str(obj.value)), comment=pkg.title or None)
 
     if importRelated and pkg.object_.related_objects:
         parseRelated(pkg.object_.related_objects, mispEvent, pkg)
@@ -166,7 +172,7 @@ def buildDomainNameAttribute(obj, mispEvent, pkg, importRelated=False):
 
 # Dedicated to Hostname (DB)
 def buildHostnameAttribute(obj, mispEvent, pkg, importRelated=False):
-    mispEvent.add_attribute('hostname', ast.literal_eval(str(obj.hostname_value)), comment=pkg.title or None)
+    mispEvent.add_attribute('hostname', ast_eval(str(obj.hostname_value)), comment=pkg.title or None)
 
     if importRelated and pkg.object_.related_objects:
         parseRelated(pkg.object_.related_objects, mispEvent, pkg)
@@ -175,7 +181,7 @@ def buildHostnameAttribute(obj, mispEvent, pkg, importRelated=False):
 
 # Dedicated to URI (DB)
 def buildURIAttribute(obj, mispEvent, pkg, importRelated=False):
-    mispEvent.add_attribute('url', ast.literal_eval(str(obj.value)), comment=pkg.title or None)
+    mispEvent.add_attribute('url', ast_eval(str(obj.value)), comment=pkg.title or None)
 
     if importRelated and pkg.object_.related_objects:
         parseRelated(pkg.object_.related_objects, mispEvent, pkg)
@@ -289,7 +295,7 @@ def buildAttribute(pkg, mispEvent):
                     buildEmailMessageAttribute(obj, mispEvent, pkg, True)
 
                 elif type_ == mutex_object.Mutex:
-                    mispEvent.add_attribute('mutex', ast.literal_eval(str(obj.name)), comment=pkg.title or None)
+                    mispEvent.add_attribute('mutex', ast_eval(str(obj.name)), comment=pkg.title or None)
                 elif type_ == whois_object.WhoisEntry:
                     pass
                 elif type_ == win_registry_key_object.WinRegistryKey:
@@ -299,10 +305,10 @@ def buildAttribute(pkg, mispEvent):
                 elif type_ == http_session_object.HTTPSession:
                     pass
                 elif type_ == pipe_object.Pipe:
-                    mispEvent.add_attribute('named pipe', ast.literal_eval(str(obj.name)), comment=pkg.title or None)
+                    mispEvent.add_attribute('named pipe', ast_eval(str(obj.name)), comment=pkg.title or None)
                 elif type_ == as_object.AS:
-                    mispEvent.add_attribute('AS', ast.literal_eval(str(obj.number)),
-                                            comment=pkg.title or ast.literal_eval(str(obj.name)) or None)
+                    mispEvent.add_attribute('AS', ast_eval(str(obj.number)),
+                                            comment=pkg.title or ast_eval(str(obj.name)) or None)
                 elif type_ == win_executable_file_object.WinExecutableFile:
                     pass
                 elif type_ == win_process_object.WinProcess:
