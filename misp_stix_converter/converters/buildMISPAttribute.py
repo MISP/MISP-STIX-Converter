@@ -23,9 +23,19 @@ from cybox.objects import x509_certificate_object, win_executable_file_object, w
 ipre = re.compile("([0-9]{1,3}.){3}[0-9]{1,3}")
 log = logging.getLogger("__main__")
 
+def uniq(lst):
+    return_list = []
+    for elem in lst:
+        if elem not in return_list:
+            return_list.append(elem)
+    return return_list
+
 def ast_eval(node):
     try:
-        return ast.literal_eval(node)
+        node = ast.literal_eval(node)
+        if isinstance(node, list):
+            node = uniq(node)
+        return node
     except ValueError:
         return str(node)
 
