@@ -27,7 +27,7 @@ inputg.add_argument("-t", "--tag", help="Download all of a single tag")
 
 parser.add_argument('-o', '--outfile', help="The file to output to. Default is stdout.", default="stdout")
 parser.add_argument("-c", "--config", help="Path to config file. Default is misp.login.")
-parser.add_argument("-v", "--verbose", help="More output", default="1.2")
+parser.add_argument("-v", "--verbose", help="More output", default=False, action="store_true")
 parser.add_argument("-l", "--logfile", help="Where to send the log to", default="converter.log")
 parser.add_argument("--format", help="The output format [JSON/XML]. Default JSON.")
 parser.add_argument("--stix-version", help="Set the STIX output version. Default 1.2.")
@@ -40,7 +40,7 @@ formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
 
 handler.setFormatter(formatter)
 log.addHandler(handler)
-log.setLevel(logging.INFO if args.verbose else logging.DEBUG)
+log.setLevel(logging.DEBUG if args.verbose else logging.INFO)
 
 log.info("MISP<->STIX Converter")
 
@@ -103,7 +103,12 @@ else:
         package = MISP.pull(tags=[args.tag])
     else:
         log.debug("Converting event %s", args.eid)
-        package = MISP.pull(args.eid)[0]
+        try:
+            package = MISP.pull(args.eid)[0]
+        except IndexError:
+            log.fatal("Could not find event %s", args.eid)
+            print("ERROR :: SEE LOG FILE")
+            sys.exit(1)
 
 
 def write_pkg(pkg, outfile):

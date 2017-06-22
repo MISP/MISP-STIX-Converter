@@ -50,6 +50,9 @@ def MISPtoSTIX(mispJSON):
         # We don't have an ID?
         # Generate a random number and use that
         stix.MISPID = random.randint(1, 9000)
+    # it's being silly
+    # backup the ID
+    backupID = stix.MISPID
 
     # Create a header for the new stix
     stix.stix_header = STIXHeader()
@@ -65,6 +68,9 @@ def MISPtoSTIX(mispJSON):
         # Build an attribute from the JSON. Is all nice.
         buildSTIXAttribute.buildAttribute(one_attrib, stix, indicator)
     stix.add_indicator(indicator)
+
+    stix.MISPID = backupID
+
     return stix
 
 
