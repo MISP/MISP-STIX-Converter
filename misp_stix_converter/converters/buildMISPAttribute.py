@@ -260,6 +260,17 @@ def buildEvent(pkg, **kwargs):
     for obj in to_process:
         # This will find literally every object ever.
         event = buildAttribute(obj, event)
+
+    # Now make sure we only have unique items
+    uniqueAttributes = []
+    uniqueAttribValues = []
+
+    for attrib in event.attributes:
+        if attrib.value not in uniqueAttribValues:
+            uniqueAttributes.append(attrib)
+            uniqueAttribValues.append(attrib.value)
+        
+    event.attributes = uniqueAttributes 
     return event
 
 
