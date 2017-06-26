@@ -60,14 +60,18 @@ def MISPtoSTIX(mispJSON):
     # Try to use the event title as the stix title
     stix.stix_header.title = misp_event.info
 
-    # We're going to store our observables inside an indicator
-    indicator = Indicator()
 
     # Go through each attribute and transfer what we can.
     for one_attrib in misp_event.attributes:
+        # We're going to store our observables inside an indicator
+        # One for each attribute because @iglocska said so
+        # I swear STIX is gonna be the death of me.
+        indicator = Indicator()
+        
         # Build an attribute from the JSON. Is all nice.
         buildSTIXAttribute.buildAttribute(one_attrib, stix, indicator)
-    stix.add_indicator(indicator)
+    
+        stix.add_indicator(indicator)
 
     stix.MISPID = backupID
 
