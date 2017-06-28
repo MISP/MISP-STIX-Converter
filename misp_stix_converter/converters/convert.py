@@ -12,6 +12,7 @@ import random
 import sys
 import re
 from pymisp import mispevent
+from lxml import etree
 
 # Stix imports
 from stix.core import STIXPackage
@@ -105,9 +106,15 @@ def load_stix(stix):
         except json_exception:
             # Ok then try loading from XML
             # Loop zoop
-            stix.seek(0)
+            # Read the STIX into an Etree
+            stixXml = etree.fromstring(data)
+
+            # Remove any "marking" sections because the US-Cert is evil
+            for element in stixXml.findall(".//{http://data-marking.mitre.org/Marking-1}Marking"):
+                element.getparent().remove(element)
+
             try:
-                stix_package = STIXPackage.from_xml(stix)
+                stix_package = STIXPackage.from_xml(stixXml)
             except Exception as ex:
                 # No joy. Quit.
                 raise STIXLoadError("Could not load stix file. {}".format(ex))
@@ -124,8 +131,6 @@ def load_stix(stix):
 
         # O I have idea for sneak
         # Will be very sneak
-        # PURGE THE US-CERT'S THING
-        stix =  re.sub(r"<marking.*/marking:Marking>", "", stix, flags=re.DOTALL)
         # Write the (probably) XML to file
         f.write(stix.encode("utf-8"))
 
