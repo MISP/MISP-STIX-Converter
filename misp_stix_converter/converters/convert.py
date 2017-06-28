@@ -107,16 +107,18 @@ def load_stix(stix):
             # Ok then try loading from XML
             # Loop zoop
             # Read the STIX into an Etree
-            if isinstance(data, bytes):
-                data = data.decode("utf-8")
             stixXml = etree.fromstring(data)
 
             # Remove any "marking" sections because the US-Cert is evil
             for element in stixXml.findall(".//{http://data-marking.mitre.org/Marking-1}Marking"):
                 element.getparent().remove(element)
 
+            f = SpooledTemporaryFile(max_size=10 * 1024)
+            f.write(etree.tostring(stixXml))
+            f.seek(0)
+
             try:
-                stix_package = STIXPackage.from_xml(stixXml)
+                stix_package = STIXPackage.from_xml(f)
             except Exception as ex:
                 # No joy. Quit.
                 raise STIXLoadError("Could not load stix file. {}".format(ex))
