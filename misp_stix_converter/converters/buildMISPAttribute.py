@@ -6,10 +6,9 @@ import hashlib
 import six
 import ast
 from pymisp import mispevent
-
 from misp_stix_converter.converters.lint_roller import lintRoll
-
 from stix.core import STIXPackage
+
 
 # Cybox cybox don't we all love cybox children
 from cybox.objects import email_message_object, file_object, address_object, socket_address_object
@@ -19,9 +18,11 @@ from cybox.objects import as_object, http_session_object
 from cybox.objects import pipe_object, network_packet_object, win_registry_key_object
 from cybox.objects import x509_certificate_object, win_executable_file_object, win_process_object
 
+
 # Just a little containment file for STIX -> MISP conversion
 ipre = re.compile("([0-9]{1,3}.){3}[0-9]{1,3}")
 log = logging.getLogger("__main__")
+
 
 def uniq(lst):
     return_list = []
@@ -29,6 +30,7 @@ def uniq(lst):
         if elem not in return_list:
             return_list.append(elem)
     return return_list
+
 
 def ast_eval(node):
     try:
@@ -41,9 +43,11 @@ def ast_eval(node):
     except SyntaxError:
         return str(node)
 
-# Dedicated to parse related object
-# Support for first level "importRelated.related_objects"
+
 def parseRelated(obj, mispEvent, pkg):
+    """Dedicated to parse related object
+    Support for first level "importRelated.related_objects"
+    """
 
     for i in obj.related_object:
         type_ = type(i.properties)
@@ -74,21 +78,24 @@ def parseRelated(obj, mispEvent, pkg):
 
     return mispEvent
 
-# Added by Davide Baglieri (aka davidonzo)
-# Limited support for email attachments, just consider this a work in progress
+
 def parseAttachment(obj, mispEvent, pkg):
+    """
+    Limited support for email attachments, just consider this a work in progress
+    """
+
     for i in obj:
         # Assuming any email attached file is a... file!
         buildFileAttribute(i.properties, mispEvent, pkg)
 
     return mispEvent
-#Added by Davide Baglieri (aka davidonzo)
 
-# Dedicated to File object
+
 def buildFileAttribute(obj, mispEvent, pkg, importRelated=False):
-
-    # All you can get by a File object in a single method
-    # TODO: all possible attributes are not yet parsed
+    """
+    All you can get by a File object in a single method
+    TODO: all possible attributes are not yet parsed
+    """
 
     if obj.file_name:
         mispEvent.add_attribute('filename', ast_eval(str(obj.file_name)), comment=pkg.title or None)
@@ -126,7 +133,7 @@ def buildFileAttribute(obj, mispEvent, pkg, importRelated=False):
 
     return mispEvent
 
-# Dedicated to Address Object (DB)
+
 def buildAddressAttribute(obj, mispEvent, pkg, importRelated=False):
 
     if obj.is_source:
@@ -152,7 +159,7 @@ def buildAddressAttribute(obj, mispEvent, pkg, importRelated=False):
 
     return mispEvent
 
-# Dedicated to EmailMessage (DB)
+
 def buildEmailMessageAttribute(obj, mispEvent, pkg, importRelated=False):
     if obj.header:
         # We have a header, can check for to/from etc etc
@@ -170,10 +177,9 @@ def buildEmailMessageAttribute(obj, mispEvent, pkg, importRelated=False):
     elif importRelated and pkg.object_.related_objects:
         parseRelated(pkg.object_.related_objects, mispEvent, pkg)
 
-
     return mispEvent
 
-# Dedicated to Domain name (DB)
+
 def buildDomainNameAttribute(obj, mispEvent, pkg, importRelated=False):
     mispEvent.add_attribute('domain', ast_eval(str(obj.value)), comment=pkg.title or None)
 
@@ -182,7 +188,7 @@ def buildDomainNameAttribute(obj, mispEvent, pkg, importRelated=False):
 
     return mispEvent
 
-# Dedicated to Hostname (DB)
+
 def buildHostnameAttribute(obj, mispEvent, pkg, importRelated=False):
     mispEvent.add_attribute('hostname', ast_eval(str(obj.hostname_value)), comment=pkg.title or None)
 
@@ -191,7 +197,7 @@ def buildHostnameAttribute(obj, mispEvent, pkg, importRelated=False):
 
     return mispEvent
 
-# Dedicated to URI (DB)
+
 def buildURIAttribute(obj, mispEvent, pkg, importRelated=False):
     mispEvent.add_attribute('url', ast_eval(str(obj.value)), comment=pkg.title or None)
 
@@ -200,9 +206,10 @@ def buildURIAttribute(obj, mispEvent, pkg, importRelated=False):
 
     return mispEvent
 
+
 def identifyHash(hsh):
     """
-        What's that hash!?
+    What's that hash!?
     """
 
     possible_hashes = []
@@ -278,8 +285,8 @@ def buildEvent(pkg, **kwargs):
         if attrib.value not in uniqueAttribValues:
             uniqueAttributes.append(attrib)
             uniqueAttribValues.append(attrib.value)
-        
-    event.attributes = uniqueAttributes 
+
+    event.attributes = uniqueAttributes
     log.debug("Finished parsing attributes.")
     return event
 
