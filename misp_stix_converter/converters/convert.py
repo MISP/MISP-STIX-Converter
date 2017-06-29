@@ -10,7 +10,6 @@ import json
 import base64
 import random
 import sys
-import re
 from pymisp import mispevent
 from lxml import etree
 
@@ -47,7 +46,7 @@ def MISPtoSTIX(mispJSON):
     stix = STIXPackage()
     try:
         stix.MISPID = mispJSON["Event"]["id"]
-    except:
+    except Exception:
         # We don't have an ID?
         # Generate a random number and use that
         stix.MISPID = random.randint(1, 9000)

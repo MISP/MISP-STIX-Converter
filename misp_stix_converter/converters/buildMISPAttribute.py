@@ -163,7 +163,9 @@ def buildEmailMessageAttribute(obj, mispEvent, pkg, importRelated=False):
     if obj.header:
         # We have a header, can check for to/from etc etc
         if obj.header.from_:
-            mispEvent.add_attribute('email-src', ast_eval(str(obj.header.from_.address_value)), comment=pkg.title or None)
+            mispEvent.add_attribute('email-src',
+                                    ast_eval(str(obj.header.from_.address_value)),
+                                    comment=pkg.title or None)
         if obj.header.to:
             for mail in obj.header.to:
                 mispEvent.add_attribute('email-dst', ast_eval(mail.address_value), comment=pkg.title or None)
