@@ -1,0 +1,34 @@
+<stix:STIX_Package xmlns:cyboxCommon="http://cybox.mitre.org/common-2" xmlns:cybox="http://cybox.mitre.org/cybox-2" xmlns:cyboxVocabs="http://cybox.mitre.org/default_vocabularies-2" xmlns:marking="http://data-marking.mitre.org/Marking-1" xmlns:tlpMarking="http://data-marking.mitre.org/extensions/MarkingStructure#TLP-1" xmlns:fsisac="http://fsisac.com/" xmlns:edge="http://soltra.com/" xmlns:indicator="http://stix.mitre.org/Indicator-2" xmlns:stixCommon="http://stix.mitre.org/common-1" xmlns:stixVocabs="http://stix.mitre.org/default_vocabularies-1" xmlns:stix="http://stix.mitre.org/stix-1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:soltra="http://taxii.soltra.com/messages/taxii_extension_xml_binding-1.1" xmlns:taxii="http://taxii.mitre.org/messages/taxii_xml_binding-1" xmlns:taxii_11="http://taxii.mitre.org/messages/taxii_xml_binding-1.1" xmlns:tdq="http://taxii.mitre.org/query/taxii_default_query-1" id="edge:Package-886c7ae0-16d6-46ff-ba61-8f0733cb893b" version="1.1.1" timestamp="2017-06-28T13:49:39.694821+00:00">
+    <stix:STIX_Header>
+        <stix:Handling>
+            <marking:Marking>
+                <marking:Controlled_Structure>../../../../descendant-or-self::node() | ../../../../descendant-or-self::node()/@*</marking:Controlled_Structure>
+                <marking:Marking_Structure xsi:type="tlpMarking:TLPMarkingStructureType" color="AMBER"/>
+            </marking:Marking>
+        </stix:Handling>
+    </stix:STIX_Header>
+    <stix:Indicators>
+        <stix:Indicator id="fsisac:indicator-bfade6ee-f12f-4082-af80-8427b2bb923d" timestamp="2015-04-02T23:38:12.625608+00:00" xsi:type="indicator:IndicatorType">
+            <indicator:Title>"UK Fuels ebill for ISO Week 201512" Phishing E-mail with 22328_201512.doc</indicator:Title>
+            <indicator:Type xsi:type="stixVocabs:IndicatorTypeVocab-1.1">Malicious E-mail</indicator:Type>
+            <indicator:Description>UK Fuels ebill for ISO Week 201512 22328_201512.doc emails with an attached word document or Excel XLS spreadsheet containing a macro.
+
+Email Subject:
+UK Fuels ebill for ISO Week 201512
+
+ebillinvoice.com or UKL Fuels Ltd have not been hacked or had their email or other servers compromised.</indicator:Description>
+            <indicator:Short_Description>UK Fuels ebill for ISO Week contains Word doc or Excel XLS spreadsheet containing a macro</indicator:Short_Description>
+            <indicator:Observable idref="fsisac:observable-0275497a-a873-4771-89d3-fc8749a70d15">
+            </indicator:Observable>
+            <indicator:Handling>
+                <marking:Marking>
+                    <marking:Controlled_Structure>../../../descendant-or-self::node()</marking:Controlled_Structure>
+                    <marking:Marking_Structure xsi:type="tlpMarking:TLPMarkingStructureType" color="AMBER"/>
+                </marking:Marking>
+            </indicator:Handling>
+            <indicator:Confidence timestamp="2015-04-02T23:38:12.625640+00:00">
+                <stixCommon:Value xsi:type="stixVocabs:HighMediumLowVocab-1.0">Medium</stixCommon:Value>
+            </indicator:Confidence>
+        </stix:Indicator>
+    </stix:Indicators>
+</stix:STIX_Package>

@@ -1,0 +1,52 @@
+<stix:STIX_Package 
+	xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	xmlns:cyboxVocabs="http://cybox.mitre.org/default_vocabularies-2"
+	xmlns:xlink="http://www.w3.org/1999/xlink"
+	xmlns:cybox="http://cybox.mitre.org/cybox-2"
+	xmlns:stixCommon="http://stix.mitre.org/common-1"
+	xmlns:stixVocabs="http://stix.mitre.org/default_vocabularies-1"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:example="http://example.com"
+	xmlns:FileObj="http://cybox.mitre.org/objects#FileObject-2"
+	xmlns:indicator="http://stix.mitre.org/Indicator-2"
+	xmlns:stix="http://stix.mitre.org/stix-1"
+	xmlns:cyboxCommon="http://cybox.mitre.org/common-2"
+	xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
+	xmlns:ttp="http://stix.mitre.org/TTP-1"
+	 id="example:Package-fdd39a2e-b67c-11e3-bcc9-f01faf20d111" version="1.2">
+    <stix:Indicators>
+        <stix:Indicator id="example:indicator-a932fcc6-e032-176c-126f-cb970a5a1ade" timestamp="2014-05-08T09:00:00+00:00" xsi:type='indicator:IndicatorType'>
+            <indicator:Title>File hash for Poison Ivy variant</indicator:Title>
+            <indicator:Type xsi:type="stixVocabs:IndicatorTypeVocab-1.0">File Hash Watchlist</indicator:Type>
+            <indicator:Description>Hey if this shows up we win</indicator:Description>
+            <indicator:Observable id="example:Observable-7d6f87bb-b4cd-42dd-b655-72557e9ea79f">
+                <cybox:Object id="example:File-91040dc2-28d8-4925-bfe8-6b50d300afe1">
+                    <cybox:Properties xsi:type="FileObj:FileObjectType">
+                        <FileObj:Hashes>
+                            <cyboxCommon:Hash>
+                                <cyboxCommon:Type xsi:type="cyboxVocabs:HashNameVocab-1.0">SHA256</cyboxCommon:Type>
+                                <cyboxCommon:Simple_Hash_Value condition="Equals">ef537f25c895bfa782526529a9b63d97aa631564d5d789c2b765448c8635fb6c</cyboxCommon:Simple_Hash_Value>
+                            </cyboxCommon:Hash>
+                        </FileObj:Hashes>
+                    </cybox:Properties>
+                </cybox:Object>
+            </indicator:Observable>
+            <indicator:Indicated_TTP>
+                <stixCommon:TTP idref="example:ttp-e610a4f1-9676-eab3-bcc6-b2768d58281a" xsi:type='ttp:TTPType'/>
+            </indicator:Indicated_TTP>
+        </stix:Indicator>
+    </stix:Indicators>
+    <stix:TTPs>
+        <stix:TTP id="example:ttp-e610a4f1-9676-eab3-bcc6-b2768d58281a" timestamp="2014-05-08T09:00:00+00:00" xsi:type='ttp:TTPType'>
+            <ttp:Title>Poison Ivy</ttp:Title>
+            <ttp:Behavior>
+                <ttp:Malware>
+                    <ttp:Malware_Instance id="example:malware-fdd60b30-b67c-11e3-b0b9-f01faf20d111">
+                        <ttp:Type xsi:type="stixVocabs:MalwareTypeVocab-1.0">Remote Access Trojan</ttp:Type>
+                        <ttp:Name>Poison Ivy</ttp:Name>
+                    </ttp:Malware_Instance>
+                </ttp:Malware>
+            </ttp:Behavior>
+        </stix:TTP>
+    </stix:TTPs>
+</stix:STIX_Package>
