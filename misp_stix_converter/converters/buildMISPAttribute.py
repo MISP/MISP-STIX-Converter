@@ -3,7 +3,6 @@ import re
 import cybox
 import logging
 import hashlib
-import six
 import ast
 from pymisp import mispevent
 from misp_stix_converter.converters.lint_roller import lintRoll
