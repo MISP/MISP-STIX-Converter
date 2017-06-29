@@ -80,7 +80,6 @@ def MISPtoSTIX(mispJSON):
 
 
 def load_stix(stix):
-    print(stix)
     # Just save the pain and load it if the first character is a <
     log.debug("Loading STIX...")
     if sys.version_info < (3, 5):
@@ -124,7 +123,7 @@ def load_stix(stix):
 
             log.debug("Writing cleaned XML to Tempfile")
             f = SpooledTemporaryFile(max_size=10 * 1024)
-            f.write(etree.tostring(stixXml, prettyprint=True))
+            f.write(etree.tostring(stixXml))
             f.seek(0)
 
             try:
