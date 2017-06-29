@@ -38,6 +38,8 @@ def ast_eval(node):
         return node
     except ValueError:
         return str(node)
+    except SyntaxError:
+        return str(node)
 
 # Dedicated to parse related object
 # Support for first level "importRelated.related_objects"
@@ -239,7 +241,9 @@ def buildEvent(pkg, **kwargs):
             title = "STIX Import"
         else:
             title = pkg.stix_header.title
-    log.info(title)
+    log.info("Using title %s", title)
+
+    log.debug("Seting up MISPEvent...")
     event = mispevent.MISPEvent()
     event.distribution = kwargs.get("distribution", 0)
     event.threat_level_id = kwargs.get("threat_level_id", 3)
@@ -247,8 +251,10 @@ def buildEvent(pkg, **kwargs):
     event.info = title
 
     if hasattr(pkg, "description"):
+        log.debug("Found description %s", pkg.description)
         event.add_attribute("comment", pkg.description)
 
+    log.debug("Beginning to Lint_roll...")
     ids = []
     to_process = []
     for obj in lintRoll(pkg):
@@ -257,11 +263,14 @@ def buildEvent(pkg, **kwargs):
                 ids.append(obj.id_)
                 to_process.append(obj)
 
+    log.debug("Processing %s object...", len(to_process))
     for obj in to_process:
+        log.debug("Working on %s...", obj)
         # This will find literally every object ever.
         event = buildAttribute(obj, event)
 
     # Now make sure we only have unique items
+    log.debug("Making sure we only have Unique attributes...")
     uniqueAttributes = []
     uniqueAttribValues = []
 
@@ -271,6 +280,7 @@ def buildEvent(pkg, **kwargs):
             uniqueAttribValues.append(attrib.value)
         
     event.attributes = uniqueAttributes 
+    log.debug("Finished parsing attributes.")
     return event
 
 
@@ -344,4 +354,6 @@ def buildAttribute(pkg, mispEvent):
             pass  # Other objects. TODO.
     except Exception as ex:
         log.error(ex)
+        log.exception(ex, exc_info=True)
+
     return mispEvent
