@@ -112,8 +112,14 @@ def load_stix(stix):
             # Loop zoop
             # Read the STIX into an Etree
             stix.seek(0)
-            stixXml = etree.parse(stix)
-
+            try:
+                stixXml = etree.parse(stix)
+            except Exception as ex:
+                # Failed to parse?
+                stix.seek(0)
+                with open("FAILED_STIX.xml", "w") as f:
+                    f.write(stix)
+                raise Exception("FAILED TO PARSE XML")
             # Remove any "marking" sections because the US-Cert is evil
             log.debug("Removing Marking elements...")
             for element in stixXml.findall(".//{http://data-marking.mitre.org/Marking-1}Marking"):
