@@ -241,6 +241,8 @@ def open_stix(stix_thing):
 
 
 def buildEvent(pkg, **kwargs):
+    if not pkg:
+        raise Exception("Attempting to convert a null package")
     log.info("Building Event...")
     if not pkg.stix_header:
         title = "STIX Import"
