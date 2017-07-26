@@ -118,7 +118,7 @@ def load_stix(stix):
                 # Failed to parse?
                 stix.seek(0)
                 with open("FAILED_STIX.xml", "w") as f:
-                    f.write(stix)
+                    f.write(stix.read())
                 raise Exception("FAILED TO PARSE XML")
             # Remove any "marking" sections because the US-Cert is evil
             log.debug("Removing Marking elements...")
@@ -132,7 +132,7 @@ def load_stix(stix):
 
             try:
                 log.debug("Attempting to read clean XML into STIX...")
-                stix_package = STIXPackage.from_xml(f.read())
+                stix_package = STIXPackage.from_xml(f)
             except Exception as ex:
                 # No joy. Quit.
                 log.fatal("Could not :<")
