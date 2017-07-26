@@ -130,6 +130,9 @@ def load_stix(stix):
             except Exception as ex:
                 # No joy. Quit.
                 log.fatal("Could not :<")
+                f.seek(0)
+                with open("FAILED_STIX.xml", "wb") as g:
+                    g.write(f.read())
                 raise STIXLoadError("Could not load stix file. {}".format(ex))
 
         return stix_package
