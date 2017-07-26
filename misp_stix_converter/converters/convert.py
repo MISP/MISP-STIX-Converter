@@ -132,7 +132,7 @@ def load_stix(stix):
 
             try:
                 log.debug("Attempting to read clean XML into STIX...")
-                stix_package = STIXPackage.from_xml(f)
+                stix_package = STIXPackage.from_xml(f.read())
             except Exception as ex:
                 # No joy. Quit.
                 log.fatal("Could not :<")
