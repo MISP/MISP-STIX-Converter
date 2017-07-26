@@ -117,7 +117,7 @@ def load_stix(stix):
             except Exception as ex:
                 # Failed to parse?
                 stix.seek(0)
-                with open("FAILED_STIX.xml", "w") as f:
+                with open("FAILED_STIX.xml", "wb") as f:
                     f.write(stix.read())
                 raise Exception("FAILED TO PARSE XML")
             # Remove any "marking" sections because the US-Cert is evil
