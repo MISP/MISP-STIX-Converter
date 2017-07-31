@@ -191,7 +191,7 @@ def STIXtoMISP(stix, mispAPI, **kwargs):
     log.debug("Encoding to b64...")
     b64Pkg = base64.b64encode(stixPackage.to_xml()).decode("utf-8")
     log.debug("Attaching original document...")
-    misp_event.add_attribute(type_="attachment", value=filename, data=b64Pkg)
+    misp_event.add_attribute(type="attachment", value=filename, data=b64Pkg)
 
     if misp_event.attributes:
         log.debug("Attributes exist. Pushing...")
