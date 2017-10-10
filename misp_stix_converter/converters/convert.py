@@ -10,6 +10,7 @@ import json
 import base64
 import random
 import sys
+from pymisp import MISPEncode
 from pymisp import mispevent
 from lxml import etree
 
@@ -195,9 +196,9 @@ def STIXtoMISP(stix, mispAPI, **kwargs):
 
     if misp_event.attributes:
         log.debug("Attributes exist. Pushing...")
-        response = mispAPI.add_event(json.dumps(misp_event, cls=mispevent.EncodeUpdate))
+        response = mispAPI.add_event(json.dumps(misp_event, cls=MISPEncode))
         if response.get('errors'):
-            raise Exception("PACKAGE: {}\nERROR: {}".format(json.dumps(misp_event, cls=mispevent.EncodeUpdate),
+            raise Exception("PACKAGE: {}\nERROR: {}".format(json.dumps(misp_event, cls=MISPEncode),
                                                             response.get('errors')))
 
         return response
