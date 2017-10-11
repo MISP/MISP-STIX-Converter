@@ -61,10 +61,7 @@ def parseRelated(obj, mispEvent, pkg):
             buildHostnameAttribute(i.properties, mispEvent, pkg)
 
         elif type_ == socket_address_object.SocketAddress:
-            if obj.ip_address:
-                buildAddressAttribute(obj.ip_address, mispEvent, pkg, True)
-        if obj.hostname:
-            buildHostnameAttribute(obj.hostname, mispEvent, pkg, True)
+            buildAddressAttribute(i.properties, mispEvent, pkg, True)
 
         elif type_ == uri_object.URI:
             buildURIAttribute(i.properties, mispEvent, pkg)
