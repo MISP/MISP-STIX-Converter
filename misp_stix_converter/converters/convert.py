@@ -10,7 +10,7 @@ import json
 import base64
 import random
 import sys
-from pymisp import MISPEncode
+from pymisp.abstract import MISPEncode
 from pymisp import mispevent
 from lxml import etree
 
