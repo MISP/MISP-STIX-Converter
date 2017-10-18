@@ -1,3 +1,4 @@
+misp_stix_converter-*
 *.log
 **/results/
 *.swp
