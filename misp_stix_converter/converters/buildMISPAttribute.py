@@ -231,6 +231,7 @@ def open_stix(stix_thing):
         pkg = STIXPackage().from_xml(stix_thing)
     except Exception:
         try:
+            stix_thing.seek(0)
             pkg = STIXPackage.from_json(stix_thing)
         except Exception:
             raise Exception("Could not load package!")
