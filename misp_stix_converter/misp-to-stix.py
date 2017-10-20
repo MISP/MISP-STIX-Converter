@@ -23,7 +23,7 @@ from misp_stix_converter.servers import misp
 from misp_stix_converter.converters import convert
 from misp_stix_converter.converters import lint_roller
 
-parser = argparse.ArgumentParser(description='Process some integers.')
+parser = argparse.ArgumentParser(description='Convert MISP to STIX.')
 inputg = parser.add_mutually_exclusive_group(required=True)
 
 inputg.add_argument("-f", "--file", help="The MISP JSON file to convert")
