@@ -195,16 +195,20 @@ def STIXtoMISP(stix, mispAPI, **kwargs):
     log.debug("Encoding to b64...")
     b64Pkg = base64.b64encode(stixPackage.to_xml()).decode("utf-8")
     log.debug("Attaching original document...")
+
     misp_event.add_attribute(type="attachment", value=filename, data=b64Pkg)
 
     if misp_event.attributes:
         log.debug("Attributes exist. Pushing...")
-        response = mispAPI.add_event(json.dumps(misp_event, cls=MISPEncode))
-        if response.get('errors'):
-            raise Exception("PACKAGE: {}\nERROR: {}".format(
-                                                    json.dumps(misp_event, cls=MISPEncode),
-                                                    response.get('errors')))
+        if mispAPI:
+            response = mispAPI.add_event(json.dumps(misp_event, cls=MISPEncode))
+            if response.get('errors'):
+                raise Exception("PACKAGE: {}\nERROR: {}".format(
+                                                        json.dumps(misp_event, cls=MISPEncode),
+                                                        response.get('errors')))
 
-        return response
+            return response
+        else:
+            return True # Dry run
     else:
         log.warning("No attributes found, ignoring.")
