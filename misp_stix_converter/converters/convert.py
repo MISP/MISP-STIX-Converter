@@ -138,7 +138,10 @@ def load_stix(stix):
 
         return stix_package
 
-    elif isinstance(stix, str):
+    elif isinstance(stix, (str, bytes)):
+        if isinstance(stix, bytes):
+            stix = stix.decode()
+
         # It's text, we'll need to use a temporary file
 
         # Create a temporary file to load from
@@ -198,8 +201,9 @@ def STIXtoMISP(stix, mispAPI, **kwargs):
         log.debug("Attributes exist. Pushing...")
         response = mispAPI.add_event(json.dumps(misp_event, cls=MISPEncode))
         if response.get('errors'):
-            raise Exception("PACKAGE: {}\nERROR: {}".format(json.dumps(misp_event, cls=MISPEncode),
-                                                            response.get('errors')))
+            raise Exception("PACKAGE: {}\nERROR: {}".format(
+                                                    json.dumps(misp_event, cls=MISPEncode),
+                                                    response.get('errors')))
 
         return response
     else:
