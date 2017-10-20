@@ -14,6 +14,11 @@ import sys
 import os
 import logging
 
+try:
+    from stix.utils import idgen
+except ImportError:
+    from mixbox import idgen
+from cybox.utils import Namespace
 from misp_stix_converter.servers import misp
 from misp_stix_converter.converters import convert
 from misp_stix_converter.converters import lint_roller
@@ -31,6 +36,8 @@ parser.add_argument("-v", "--verbose", help="More output", default=False, action
 parser.add_argument("-l", "--logfile", help="Where to send the log to", default="converter.log")
 parser.add_argument("--format", help="The output format [JSON/XML]. Default JSON.")
 parser.add_argument("--stix-version", help="Set the STIX output version. Default 1.2.")
+parser.add_argument("--namespace", help="Set the output namespace")
+parser.add_argument("--ns-alias", help="Set the NS alias")
 
 args = parser.parse_args()
 
@@ -70,6 +77,22 @@ if args.format:
         sys.exit()
 else:
     args.format = "json"
+
+if (args.namespace or args.ns_alias) and not (args.namespace and args.ns_alias):
+    print("If you want to provide namespace config, we need both --namespace and --ns-alias")
+    sys.exit()
+
+ns_url = "https://misp.software"
+ns_alias = "MISPtoSTIX"
+
+if (args.namespace):
+    ns_url = args.namespace
+    ns_alias = args.ns_alias
+ 
+try:    
+    idgen.set_id_namespace({ns_url: ns_alias})
+except ValueError:
+    idgen.set_id_namespace(Namespace(ns_url, ns_alias))
 
 if (args.file):
 
