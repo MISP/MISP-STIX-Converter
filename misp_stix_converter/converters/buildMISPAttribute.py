@@ -221,23 +221,6 @@ def identifyHash(hsh):
     return possible_hashes
 
 
-def open_stix(stix_thing):
-    # Load the package
-    if not hasattr(stix_thing, 'read'):
-        stix_thing = open(stix_thing, "r")
-
-    pkg = None
-    try:
-        pkg = STIXPackage().from_xml(stix_thing)
-    except Exception:
-        try:
-            stix_thing.seek(0)
-            pkg = STIXPackage.from_json(stix_thing)
-        except Exception:
-            raise Exception("Could not load package!")
-    return pkg
-
-
 def buildEvent(pkg, **kwargs):
     log.info("Building Event...")
     if not pkg.stix_header:
@@ -273,8 +256,10 @@ def buildEvent(pkg, **kwargs):
     for obj in to_process:
         log.debug("Working on %s...", obj)
         # This will find literally every object ever.
-        event = buildAttribute(obj, event)
-
+        try:
+            event = buildAttribute(obj, event)
+        except Exception as ex:
+            log.exception(ex)
     # Now make sure we only have unique items
     log.debug("Making sure we only have Unique attributes...")
     uniqueAttributes = []

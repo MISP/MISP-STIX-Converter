@@ -15,7 +15,7 @@ import sys
 import os
 
 from misp_stix_converter.servers import misp
-from misp_stix_converter.converters.buildMISPAttribute import open_stix
+from misp_stix_converter.converters.convert import load_stix
 
 parser = argparse.ArgumentParser(description='Process some integers.')
 parser.add_argument("-c", "--config", help="Path to config file. Default is misp.login.")
@@ -58,7 +58,10 @@ MISP = misp.MISP(CONFIG["MISP"]["URL"], CONFIG["MISP"]["KEY"], CONFIG["MISP"].ge
 
 # Load the package
 log.info("Opening STIX file %s", args.file)
-pkg = open_stix(args.file)
+# Sometimes it's thrown as bytes?
+fname = args.file
+with open(fname, "r") as f:
+    pkg = load_stix(f)
 
 # We'll use my nice little misp module
 log.info("Pushing to MISP...")

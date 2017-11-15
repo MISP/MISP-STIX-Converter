@@ -18,6 +18,9 @@ from lxml import etree
 from stix.core import STIXPackage
 from stix.core import STIXHeader
 from stix.indicator import Indicator
+from stix.utils import nsparser
+import mixbox.namespaces
+from mixbox.namespaces import Namespace
 
 # Local imports
 from misp_stix_converter.errors import STIXLoadError
@@ -113,7 +116,9 @@ def load_stix(stix):
             # Loop zoop
             # Read the STIX into an Etree
             stix.seek(0)
-            stixXml = etree.parse(stix)
+            stixXml = etree.fromstring(stix.read())
+
+            ns_map = stixXml.nsmap
 
             # Remove any "marking" sections because the US-Cert is evil
             log.debug("Removing Marking elements...")
@@ -125,11 +130,23 @@ def load_stix(stix):
             f.write(etree.tostring(stixXml))
             f.seek(0)
 
+            # Pray to anything you hold sacred
+            ns_objmap = map(lambda x: Namespace(ns_map[x], x), ns_map)
+
+            for ns in ns_objmap:
+                log.debug("Trying to add namespace %s", ns)
+                try:
+                    nsparser.STIX_NAMESPACES.add_namespace(ns)
+                    mixbox.namespaces.register_namespace(ns)
+                except Exception as ex:
+                    log.exception(ex)
+    
             try:
                 log.debug("Attempting to read clean XML into STIX...")
                 stix_package = STIXPackage.from_xml(f)
             except Exception as ex:
                 # No joy. Quit.
+                print(ex)
                 log.fatal("Could not :<")
                 f.seek(0)
                 with open("FAILED_STIX.xml", "wb") as g:
