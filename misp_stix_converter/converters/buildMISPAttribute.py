@@ -108,20 +108,20 @@ def buildFileAttribute(obj, mispEvent, pkg, importRelated=False):
     if obj.md5:
         # We actually have to check the length
         # An actual report had supposed md5s of length 31. Silly.
-        if len(obj.md5) == 32:
+        if len(str(obj.md5)) == 32:
             mispEvent.add_attribute('md5', ast_eval(str(obj.md5)), comment=pkg.title or None)
 
     if obj.sha1:
-        if len(obj.sha1) == 40:
+        if len(str(obj.sha1)) == 40:
             mispEvent.add_attribute('sha1', ast_eval(str(obj.sha1)), comment=pkg.title or None)
 
     if obj.sha256:
-        if len(obj.sha256) == 64:
+        if len(str(obj.sha256)) == 64:
             mispEvent.add_attribute('sha256', ast_eval(str(obj.sha256)), comment=pkg.title or None)
 
     # Added support for SHA512 (DB)
     if obj.sha512:
-        if len(obj.sha512) == 128:
+        if len(str(obj.sha512)) == 128:
             mispEvent.add_attribute('sha512', ast_eval(str(obj.sha512)), comment=pkg.title or None)
 
     if importRelated and pkg.object_.related_objects:
