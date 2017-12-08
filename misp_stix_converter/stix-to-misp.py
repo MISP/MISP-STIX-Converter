@@ -44,7 +44,7 @@ def parse_args(args):
         default=False, action="store_true")
     parser.add_argument("file", help="The STIX file to push")
 
-    return parser.parse_args()
+    return parser.parse_args(args)
 
 
 def main():
@@ -91,4 +91,4 @@ def main():
 
 
 if __name__ == '__main__':
-    sys.exit(main)
+    sys.exit(main())
