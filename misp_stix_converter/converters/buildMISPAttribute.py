@@ -285,15 +285,16 @@ def buildEvent(pkg, **kwargs):
             log.exception(ex)
     # Now make sure we only have unique items
     log.debug("Making sure we only have Unique attributes...")
-    uniqueAttributes = []
+    
     uniqueAttribValues = []
 
-    for attrib in event.attributes:
+    for attrindex, attrib in enumerate(event.attributes):
         if attrib.value not in uniqueAttribValues:
-            uniqueAttributes.append(attrib)
             uniqueAttribValues.append(attrib.value)
+        else:
+            log.debug("Removed duplicated attribute in package: "+attrib.value)
+            event.attributes.pop(attrindex)
 
-    event.attributes = uniqueAttributes
     log.debug("Finished parsing attributes.")
     return event
 
