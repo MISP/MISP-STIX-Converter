@@ -132,23 +132,46 @@ def buildFileAttribute(obj, mispEvent, pkg, importRelated=False):
 
 def buildAddressAttribute(obj, mispEvent, pkg, importRelated=False):
 
-    if obj.is_source:
-        mispEvent.add_attribute('ip-src', ast_eval(str(obj.address_value)), comment=pkg.title or None)
+    # See issue #34
+    # Apparently this can be an email?
+    if obj.category == "e-mail":
+        # it's an email address (for some reason)
+        if obj.is_source:
+            mispEvent.add_attribute("email-src", ast_eval(str(obj.address_value)),
+                                    comment=pkg.title or None)
 
-    elif obj.is_destination:
-        mispEvent.add_attribute('ip-dst', ast_eval(str(obj.address_value)), comment=pkg.title or None)
-    else:
-        # We don't know, first check if it's an IP range
-        if hasattr(obj, "condition") and obj.condition:
-            if obj.condition == "InclusiveBetween":
-                # Ok, so it's a range. hm. Shall we add them seperately#comma#or together?
-                mispEvent.add_attribute('ip-dst', ast_eval(str(obj.address_value[0])))
-                mispEvent.add_attribute('ip-dst', ast_eval(str(obj.add_attribute[1])))
-            elif obj.condition == "Equals":
-                mispEvent.add_attribute('ip-dst', ast_eval(str(obj.address_value)), comment=pkg.title or None)
+        elif obj.is_destination:
+            mispEvent.add_attribute("email-dst", ast_eval(str(obj.address_value)),
+                                    comment=pkg.title or None)
         else:
-            # Don't have anything to go on
-            mispEvent.add_attribute('ip-dst', ast_eval(str(obj.address_value)), comment=pkg.title or None)
+            mispEvent.add_attribute("email-src", ast_eval(str(obj.address_value)),
+                                    comment=pkg.title or None)
+           
+    elif obj.category == "ipv4-addr":
+        if obj.is_source:
+            mispEvent.add_attribute('ip-src', ast_eval(str(obj.address_value)), 
+                                    comment=pkg.title or None)
+
+        elif obj.is_destination:
+            mispEvent.add_attribute('ip-dst', ast_eval(str(obj.address_value)), 
+                                    comment=pkg.title or None)
+    
+        else:
+            # We don't know, first check if it's an IP range
+            if hasattr(obj, "condition") and obj.condition:
+                if obj.condition == "InclusiveBetween":
+                    # Ok, so it's a range. hm. Shall we add them seperately#comma#or together?
+                    mispEvent.add_attribute('ip-dst', ast_eval(str(obj.address_value[0])))
+                    mispEvent.add_attribute('ip-dst', ast_eval(str(obj.add_attribute[1])))
+            
+                elif obj.condition == "Equals":
+                    mispEvent.add_attribute('ip-dst', ast_eval(str(obj.address_value)), 
+                                            comment=pkg.title or None)
+        
+                else:
+                    # Don't have anything to go on
+                    mispEvent.add_attribute('ip-dst', ast_eval(str(obj.address_value)), 
+                                            comment=pkg.title or None)
 
     if importRelated and pkg.object_.related_objects:
         parseRelated(pkg.object_.related_objects, mispEvent, pkg)
