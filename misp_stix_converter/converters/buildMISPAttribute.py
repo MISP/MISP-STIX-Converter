@@ -172,6 +172,10 @@ def buildAddressAttribute(obj, mispEvent, pkg, importRelated=False):
                     # Don't have anything to go on
                     mispEvent.add_attribute('ip-dst', ast_eval(str(obj.address_value)), 
                                             comment=pkg.title or None)
+            else:
+                # Don't have anything to go on
+                mispEvent.add_attribute('ip-dst', ast_eval(str(obj.address_value)),
+                                        comment=pkg.title or None)
 
     if importRelated and pkg.object_.related_objects:
         parseRelated(pkg.object_.related_objects, mispEvent, pkg)
