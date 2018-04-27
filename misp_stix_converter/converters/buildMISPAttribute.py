@@ -296,7 +296,7 @@ def buildEvent(pkg, **kwargs):
         if attrib.value not in uniqueAttribValues:
             uniqueAttribValues.append(attrib.value)
         else:
-            log.debug("Removed duplicated attribute in package: "+attrib.value)
+            log.debug("Removed duplicated attribute in package: %s", attrib.value)
             event.attributes.pop(attrindex)
 
     log.debug("Finished parsing attributes.")
