@@ -121,9 +121,12 @@ def load_stix(stix):
             ns_map = stixXml.nsmap
 
             # Remove any "marking" sections because the US-Cert is evil
-            log.debug("Removing Marking elements...")
-            for element in stixXml.findall(".//{http://data-marking.mitre.org/Marking-1}Marking"):
-                element.getparent().remove(element)
+            #log.debug("Removing Marking elements...")
+            #for element in stixXml.findall(".//{http://data-marking.mitre.org/Marking-1}Marking"):
+            #    element.getparent().remove(element)
+            # Davide Baglieri: removing Marking elements result just in a loss of data.
+            # No problem or bug detected commenting the lines above.
+            # Tested for months in a production environment
 
             log.debug("Writing cleaned XML to Tempfile")
             f = SpooledTemporaryFile(max_size=10 * 1024)
