@@ -257,9 +257,6 @@ def buildEvent(pkg, **kwargs):
             title = "STIX Import"
         else:
             title = pkg.stix_header.title
-        if hasattr(pkg.stix_header, "description"):
-            log.debug("Found description %s", pkg.stix_header.description.value)
-            event.add_attribute("comment", pkg.stix_header.description.value)
 
     log.info("Using title %s", title)
 
@@ -269,6 +266,10 @@ def buildEvent(pkg, **kwargs):
     event.threat_level_id = kwargs.get("threat_level_id", 3)
     event.analysis = kwargs.get("analysis", 0)
     event.info = title
+
+    if pkg.stix_header and hasattr(pkg.stix_header, "description"):
+        log.debug("Found description %s", pkg.stix_header.description.value)
+        event.add_attribute("comment", pkg.stix_header.description.value)
 
     log.debug("Beginning to Lint_roll...")
     ids = []
