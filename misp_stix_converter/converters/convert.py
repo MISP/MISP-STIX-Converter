@@ -120,11 +120,6 @@ def load_stix(stix):
 
             ns_map = stixXml.nsmap
 
-            # Remove any "marking" sections because the US-Cert is evil
-            log.debug("Removing Marking elements...")
-            for element in stixXml.findall(".//{http://data-marking.mitre.org/Marking-1}Marking"):
-                element.getparent().remove(element)
-
             log.debug("Writing cleaned XML to Tempfile")
             f = SpooledTemporaryFile(max_size=10 * 1024)
             f.write(etree.tostring(stixXml))
@@ -153,6 +148,18 @@ def load_stix(stix):
                     g.write(f.read())
                 raise STIXLoadError("Could not load stix file. {}".format(ex))
 
+        log.debug("Removing Marking elements except TLP...")
+        if hasattr(stix_package, 'stix_header') and hasattr(stix_package.stix_header, 'handling') and hasattr(stix_package.stix_header.handling, 'marking'):
+            for m in stix_package.stix_header.handling.marking:
+                if hasattr(m, 'marking_structures'):
+                    for ms in m.marking_structures:
+                        if hasattr(ms, 'color'):
+                            log.debug('TLP found in marking_structures:%s', ms.color)
+                            log.debug('Clear all handling elements')
+                            stix_package.stix_header.handling.clear()
+                            log.debug('Add only TLP marking_structures')
+                            stix_package.stix_header.handling.add_marking(ms)
+                            break
         return stix_package
 
     elif isinstance(stix, (str, bytes)):
