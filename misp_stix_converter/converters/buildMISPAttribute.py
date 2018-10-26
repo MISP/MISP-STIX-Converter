@@ -270,6 +270,16 @@ def buildEvent(pkg, **kwargs):
         log.debug("Found description %s", pkg.description)
         event.add_attribute("comment", pkg.description)
 
+    if pkg.stix_header and hasattr(pkg.stix_header, "handling") and hasattr(pkg.stix_header.handling, "marking"):
+        for m in pkg.stix_header.handling.marking:
+            if hasattr(m, "controlled_structure") and hasattr(m.controlled_structure, "color"):
+                tlp = m.controlled_structure.color.lower()
+                log.debug("Found TLP %s", tlp)
+                tlp_tag = "tlp:" + tlp
+                log.debug("Add %s as MISP tag", tlp_tag)
+                event.add_tag(tlp_tag)
+                break
+
     log.debug("Beginning to Lint_roll...")
     ids = []
     to_process = []
