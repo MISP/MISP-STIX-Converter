@@ -267,7 +267,7 @@ def buildEvent(pkg, **kwargs):
     event.analysis = kwargs.get("analysis", 0)
     event.info = title
 
-    if pkg.stix_header and hasattr(pkg.stix_header, "description"):
+    if pkg.stix_header and hasattr(pkg.stix_header, "description") and hasattr(pkg.stix_header.description, 'value'):
         log.debug("Found description %s", pkg.stix_header.description.value)
         event.add_attribute("comment", pkg.stix_header.description.value)
 
