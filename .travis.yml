@@ -4,8 +4,7 @@ python:
     - "3.6"
 
 before_install:
-    - "git clone https://github.com/MISP/PyMISP.git"
-    - "cd PyMISP && python setup.py install && pip3 install -r REQUIREMENTS.txt && cd .."
+    - "pip install -r REQUIREMENTS.txt"
     - "pip install coveralls"
     - "pip install coverage"
 
