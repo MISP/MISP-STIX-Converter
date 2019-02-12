@@ -1,0 +1,7 @@
+requests
+pyaml
+cabby
+maec
+-e git+https://github.com/MISP/PyMISP#egg=pymisp
+-e git+https://github.com/STIXProject/python-stix.git#egg=stix
+-e git+https://github.com/CybOXProject/python-cybox.git#egg=cybox

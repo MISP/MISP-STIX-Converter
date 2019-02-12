@@ -1,15 +1,19 @@
 language: python
 python:
     - "3.5"
-    - "3.5-dev"
+    - "3.6"
     - "nightly"
+
 before_install:
     - "git clone https://github.com/MISP/PyMISP.git"
-    - "cd PyMISP && python setup.py install && cd .."
+    - "cd PyMISP && python setup.py install && pip3 install -r REQUIREMENTS.txt && cd .."
     - "pip install coveralls"
     - "pip install coverage"
+
 install: 
     - "pip install ."
-script:  "nosetests --with-coverage -v"
+
+script: 
+    - "nosetests --with-coverage -v"
 after_success:
     - coveralls

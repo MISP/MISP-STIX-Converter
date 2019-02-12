@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 import glob
 from misp_stix_converter.converters import convert
 from misp_stix_converter.servers import misp

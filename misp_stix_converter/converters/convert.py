@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 # A decoupled converter for misp<->Stix
 
 # Imports
@@ -97,10 +95,14 @@ def load_stix(stix):
 
     elif hasattr(stix, 'read'):
         log.debug("Argument has 'read' attribute, assuming file-like.")
+
         # It's a file!
-        # But somehow, sometimes, reading it returns a bytes stream and the loader dies on python 3.4.
-        # Luckily, STIXPackage.from_json (which is mixbox.Entity.from_json) will happily load a string.
+        # But somehow, sometimes, reading it returns a bytes stream
+        # and the loader dies on python 3.4.
+        # Luckily, STIXPackage.from_json (which is mixbox.Entity.from_json)
+        # will happily load a string.
         # So we're going to play dirty.
+
         data = stix.read()
         log.debug("Read file, type %s.", type(data))
 
@@ -116,18 +118,19 @@ def load_stix(stix):
             # Loop zoop
             # Read the STIX into an Etree
             stix.seek(0)
-            stixXml = etree.fromstring(stix.read())
+            stix_xml = etree.fromstring(stix.read())
 
-            ns_map = stixXml.nsmap
+            ns_map = stix_xml.nsmap
 
             # Remove any "marking" sections because the US-Cert is evil
             log.debug("Removing Marking elements...")
-            for element in stixXml.findall(".//{http://data-marking.mitre.org/Marking-1}Marking"):
+            pattern = ".//{http://data-marking.mitre.org/Marking-1}Marking"
+            for element in stix_xml.findall(pattern):
                 element.getparent().remove(element)
 
             log.debug("Writing cleaned XML to Tempfile")
             f = SpooledTemporaryFile(max_size=10 * 1024)
-            f.write(etree.tostring(stixXml))
+            f.write(etree.tostring(stix_xml))
             f.seek(0)
 
             # Pray to anything you hold sacred
@@ -140,14 +143,13 @@ def load_stix(stix):
                     mixbox.namespaces.register_namespace(ns)
                 except Exception as ex:
                     log.exception(ex)
-    
             try:
                 log.debug("Attempting to read clean XML into STIX...")
                 stix_package = STIXPackage.from_xml(f)
             except Exception as ex:
                 # No joy. Quit.
-                print(ex)
                 log.fatal("Could not :<")
+                log.exception(ex)
                 f.seek(0)
                 with open("FAILED_STIX.xml", "wb") as g:
                     g.write(f.read())
@@ -179,7 +181,8 @@ def load_stix(stix):
 
 
 def STIXtoMISP(stix, mispAPI, **kwargs):
-    """Function to convert from something stixxy ( as we have 3 possible representations )
+    """Function to convert from something stixxy
+    ( as we have 3 possible representations )
     to something mispy. Specifically JSON. Because XML is satan.
 
     :param stix: Something stixxy.
@@ -218,14 +221,15 @@ def STIXtoMISP(stix, mispAPI, **kwargs):
     if misp_event.attributes:
         log.debug("Attributes exist. Pushing...")
         if mispAPI:
-            response = mispAPI.add_event(json.dumps(misp_event, cls=MISPEncode))
+            response = mispAPI.add_event(
+                json.dumps(misp_event, cls=MISPEncode))
             if response.get('errors'):
                 raise Exception("PACKAGE: {}\nERROR: {}".format(
-                                                        json.dumps(misp_event, cls=MISPEncode),
-                                                        response.get('errors')))
+                    json.dumps(misp_event, cls=MISPEncode),
+                    response.get('errors')))
 
             return response
         else:
-            return True # Dry run
+            return True
     else:
         log.warning("No attributes found, ignoring.")
