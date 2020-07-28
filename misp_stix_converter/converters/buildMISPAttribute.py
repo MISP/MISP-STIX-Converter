@@ -6,7 +6,6 @@ import hashlib
 import ast
 from pymisp import mispevent
 from misp_stix_converter.converters.lint_roller import lintRoll
-from stix.core import STIXPackage
 
 
 # Cybox cybox don't we all love cybox children
@@ -178,7 +177,7 @@ def buildAddressAttribute(obj, mispEvent, pkg, importRelated=False):
                     # seperately#comma#or together?
                     attribute = mispEvent.add_attribute(
                         'ip-dst', ast_eval(str(obj.address_value[0])))
-                    attribute = mispEvent.add_attribute(
+                    mispEvent.add_attribute(
                         'ip-dst', ast_eval(str(obj.add_attribute[1])))
 
                 elif obj.condition == "Equals":
@@ -311,73 +310,49 @@ def parseThreatConnectTags(event, attribute, description):
 
     return attribute, event
 
-
-def parseIndicators(event, pkg):
-    stix_header = pkg.stix_header
-    header = {"information_source.identity.name": "",
+def parseIndicatorHeader(stix_header,event):
+    header = {"information_source.identity.name": "","event_info":"",
               "information_source.description": "", "information_source.references": ""}
 
     # Parse select vocabulary from stix_header
-    if hasattr(stix_header,
-               "information_source") and stix_header.information_source:
-        information_source = stix_header.information_source
-        if (hasattr(information_source, "identity") and information_source.identity
-                and hasattr(information_source.identity, "name") and information_source.identity.name):
-            header["information_source.identity.name"] = information_source.identity.name
-            event.add_tag("STIX:Producer={}".format(
-                header["information_source.identity.name"]))
-            log.debug("Information Source:%s",
-                      header["information_source.identity.name"])
-        if hasattr(information_source,
-                   "decription") and information_source.description:
-            header["information_source.description"] = information_source.description
-            log.debug("Information source description:%s",
-                      header["information_source.description"])
-        if hasattr(information_source,
-                   "references") and information_source.references:
-            header["information_source.references"] = ';'.join(
-                list(information_source.references)).strip(';')
-            log.debug("Information source references:%s",
-                      header["information_source.references"])
-    event_info = "Description:{}\nProducer:{}\nReferernces:{}\n".format(
-        header["information_source.description"], header["information_source.identity.name"], header["information_source.references"]
-    )
+    try:
+        if hasattr(stix_header,
+                   "information_source") and stix_header.information_source:
+            information_source = stix_header.information_source
+            if (hasattr(information_source, "identity") and information_source.identity
+                    and hasattr(information_source.identity, "name") and information_source.identity.name):
+                header["information_source.identity.name"] = information_source.identity.name
+                event.add_tag("STIX:Producer={}".format(
+                    header["information_source.identity.name"]))
+                log.debug("Information Source:%s",
+                          header["information_source.identity.name"])
+            if hasattr(information_source,
+                       "decription") and information_source.description:
+                header["information_source.description"] = information_source.description
+                log.debug("Information source description:%s",
+                          header["information_source.description"])
+            if hasattr(information_source,
+                       "references") and information_source.references:
+                header["information_source.references"] = ';'.join(
+                    list(information_source.references)).strip(';')
+                log.debug("Information source references:%s",
+                          header["information_source.references"])
+        event_info = "Description:{}\nProducer:{}\nReferernces:{}\n".format(
+            header["information_source.description"], header["information_source.identity.name"], header["information_source.references"]
+        )
+    except Exception as ex:
+        log.exception("Error parsing STIX header:%s",str(ex))
+        return header,'',event
+    return header,event_info,event
 
-    has_indicators = False
-    for intent in pkg.stix_header.package_intents:
-        if str(intent).lower() == "indicators":
-            has_indicators = True
-            break
-
-    indicators = None
-    if has_indicators:
-        indicators = pkg.indicators
-    else:
-        log.info("No indicators!")
-        return event
-
-    processed = set()
-    producers = set()
-    for indicator in indicators:
-        meta = {"title": "", "description": "", "producer.identity.name": "",
-                "producer.references": "", "producer.time.produced_time": ""}
-
-        # Loop through each indicator object and parse tags,comment data and
-        # sighting
-        if hasattr(indicator, "observable") and isinstance(
-                indicator.observable, cybox.core.observable.Observable):
-            if indicator.observable.id_ in processed:
-                continue
-
+def parseIndicatorMeta(indicator,event,attribute,header):
+    meta = {"title": "", "description": "", "producer.identity.name": "",
+            "producer.references": "", "producer.time.produced_time": ""}
+    producers=set()
+    try:
         if indicator.id_.startswith("threatconnect"):
             meta["threatconnect"] = True
-        attribute, event_ = buildAttribute(indicator.observable, event)
-        if event_:
-            event = event_
 
-        if not attribute:
-            log.info("Failed to get an attribute object")
-            return event
         if not hasattr(attribute, "comment"):
             attribute.comment = ""
         if hasattr(indicator, "title") and indicator.title:
@@ -427,13 +402,55 @@ def parseIndicators(event, pkg):
 
         attribute.comment = "{comment}\nTitle:{title}\nTime:{time}\n\nDescription:{description}\nProducer:{producer}\nReferences:{references}\n\nEvent Information:{info}\n".format(
             comment=attribute.comment, title=meta["title"], time=meta["producer.time.produced_time"],
-            description=meta["description"], producer=meta["producer.identity.name"], references=meta["producer.references"], info=event_info)
+            description=meta["description"], producer=meta["producer.identity.name"], references=meta["producer.references"], info=header["event_info"])
+        meta["producers"] = list(producers)
+    except Exception as ex:
+        log.exception("Error parsing indicator metadata:%s",str(ex))
 
+    return meta,attribute,event
+        
+def parseIndicators(event, pkg):
+    stix_header = pkg.stix_header
+
+    header,event_info,event = parseIndicatorHeader(stix_header,event)
+
+    has_indicators = False
+    for intent in pkg.stix_header.package_intents:
+        if str(intent).lower() == "indicators":
+            has_indicators = True
+            break
+
+    indicators = None
+    if has_indicators:
+        indicators = pkg.indicators
+    else:
+        log.info("No indicators!")
+        return event
+
+    processed = set()
+    for indicator in indicators:
+
+        # Loop through each indicator object and parse tags,comment data and
+        # sighting
+        if hasattr(indicator, "observable") and isinstance(
+                indicator.observable, cybox.core.observable.Observable):
+            if indicator.observable.id_ in processed:
+                continue
+
+        attribute, event_ = buildAttribute(indicator.observable, event)
+        if event_:
+            event = event_
+
+        if not attribute:
+            log.info("Failed to get an attribute object")
+            return event
+
+        meta, attribute, event = parseIndicatorMeta(indicator,event,attribute,header)
         # Add an event tag that includes a list of all the information sources
         # for the attributes in the feed.
-        if len(producers) > 0:
+        if len(meta["producers"]) > 0:
             event.add_tag("STIX:Producer={}".format(
-                ','.join(list(producers)).strip(',')))
+                ','.join(meta["producers"]).strip(',')))
     return event
 
 
