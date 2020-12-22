@@ -11,7 +11,7 @@ from misp_stix_converter.converters.lint_roller import lintRoll
 # Cybox cybox don't we all love cybox children
 from cybox.objects import email_message_object, file_object, address_object, socket_address_object
 from cybox.objects import domain_name_object, hostname_object, uri_object
-from cybox.objects import mutex_object, whois_object
+from cybox.objects import mutex_object, whois_object, link_object
 from cybox.objects import as_object, http_session_object
 from cybox.objects import pipe_object, network_packet_object, win_registry_key_object
 from cybox.objects import x509_certificate_object, win_executable_file_object, win_process_object
@@ -557,7 +557,7 @@ def buildAttribute(pkg, mispEvent):
                         attribute, event_ = buildHostnameAttribute(
                             obj.hostname, mispEvent, pkg, True)
 
-                elif type_ == uri_object.URI:
+                elif type_ == uri_object.URI or type_ == link_object.URI or link_object.Link:
                     # Now script uses buildURIAttribute (DB)
                     attribute, event_ = buildURIAttribute(
                         obj, mispEvent, pkg, True)
