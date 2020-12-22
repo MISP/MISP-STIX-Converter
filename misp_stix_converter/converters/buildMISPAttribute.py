@@ -467,7 +467,7 @@ def buildEvent(pkg, **kwargs):
 
     log.debug("Seting up MISPEvent...")
     event = mispevent.MISPEvent()
-    event.distribution = kwargs.get("distribution", 0)
+    event.distribution = kwargs.get("distribution", 1)
     event.threat_level_id = kwargs.get("threat_level_id", 3)
     event.analysis = kwargs.get("analysis", 0)
     event.info = title
