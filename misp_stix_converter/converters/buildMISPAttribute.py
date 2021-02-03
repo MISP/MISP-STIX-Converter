@@ -268,9 +268,12 @@ def identifyHash(hsh):
     hashes = [x for x in hashlib.algorithms_guaranteed]
 
     for h in hashes:
-        if len(str(hsh)) == len(hashlib.new(h).hexdigest()):
-            possible_hashes.append(h)
-            possible_hashes.append("filename|{}".format(h))
+        try:
+            if len(str(hsh)) == len(hashlib.new(h).hexdigest()):
+                possible_hashes.append(h)
+                possible_hashes.append("filename|{}".format(h))
+        except TypeError:
+            pass
     return possible_hashes
 
 

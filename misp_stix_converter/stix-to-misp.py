@@ -9,10 +9,10 @@
 
 import argparse
 import logging
-import pyaml
-import time
-import sys
 import os
+import pyaml
+import sys
+import time
 
 from misp_stix_converter.servers import misp
 from misp_stix_converter.converters.convert import load_stix
@@ -34,16 +34,14 @@ ch.setFormatter(formatter)
 log.addHandler(ch)
 
 # Set the config file
-if args.config:
-    configfile = args.config
-else:
-    configfile = os.path.expanduser("~/.misptostix/misp.login")
+cfg_path = args.config if args.config else os.path.expanduser(
+    "~/.misptostix/misp.login")
 
 try:
-    with open(configfile, "r") as f:
+    with open(cfg_path, "r") as f:
         CONFIG = pyaml.yaml.load(f)
 except FileNotFoundError:
-    log.fatal("Could not find config file %s", configfile)
+    log.fatal("Could not find config file %s", cfg_path)
     sys.exit(1)
 
 # Backwards compatability, if users haven't updated config
@@ -52,16 +50,18 @@ if "SSL" not in CONFIG["MISP"]:
     time.sleep(1)
     CONFIG["MISP"]["SSL"] = False
 
-# This is just a file conversion
-# Relatively quick and easy
-MISP = misp.MISP(CONFIG["MISP"]["URL"], CONFIG["MISP"]["KEY"], CONFIG["MISP"].get("SSL", True))
-
 # Load the package
-log.info("Opening STIX file %s", args.file)
-# Sometimes it's thrown as bytes?
-fname = args.file
-with open(fname, "r") as f:
-    pkg = load_stix(f)
+in_path = args.file
+log.info("Opening STIX file %s", in_path)
+try:
+    with open(in_path, "r") as f:  # Sometimes it's thrown as bytes?
+        pkg = load_stix(f)
+except OSError:
+    log.fatal("Could not open STIX file %s", in_path)
+    sys.exit(1)
+
+# This is just a file conversion - relatively quick and easy
+MISP = misp.MISP(CONFIG["MISP"]["URL"], CONFIG["MISP"]["KEY"], CONFIG["MISP"].get("SSL", True))
 
 # We'll use my nice little misp module
 log.info("Pushing to MISP...")
